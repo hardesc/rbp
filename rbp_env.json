@@ -1,0 +1,12 @@
+{
+	"env": "Demo Server",
+	"port": "4349",
+	"server": "127.0.0.1",
+	"guest_server": "127.0.0.1:4349",
+	"dev_redirect_outgoing_emails_to": "charleshardes@gmail.com",
+	"admin_email": "charleshardes@gmail.com",
+	"sendmail_from_noreply": "charleshardes@gmail.com",
+	"smtp_host": "smtp.gmail.com",
+	"smtp_username": "charleshardes@gmail.com",
+	"smtp_password": "123qwe!@#QWE234"
+}
