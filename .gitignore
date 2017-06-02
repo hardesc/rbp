@@ -1,0 +1,7 @@
+# Fossil files #
+rbp.fossil
+fossil.exe
+_FOSSIL_
+
+# RBP files for local machine #
+rvp_env.json 
