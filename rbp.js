@@ -5998,7 +5998,7 @@ function middleHandler_db_check_user_supplied_property(req, res, next) {
 	sql = sql.replace('@@prop', req.query.prop);
 	db.each(sql, function(err, row) {		
 		req.propid = row.propertyID
-		req.prop_linksite = row.linksite
+		req.prop_linksite = "http://" + env.guest_server + "/" + row.linksite + "/"
 	}, function () {	
 		next();
 	});	
