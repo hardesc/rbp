@@ -151,7 +151,8 @@ function replace_all(html, i, val) {
 	var re = new RegExp(i, 'g');
 	return html.replace( re, val);		
 }
-	
+
+//takes an html string with @@placeholders, replace the @@placeholders with array values, returns new html string
 function replace_all_array(html, array) {
 	for(var i in array){
 		var re = new RegExp("@@"+i, 'g');
@@ -340,9 +341,14 @@ function add_checkbox(req, idx, ps, did, nid, label){
 }
 
 function guest_input(req, tab, pid, did, label, type, pattern, placeholder, style){
-	var atku = ""; if(req==1){atku = "onkeyup='atku(this);'"}
-	if(pattern == ""){}else{pattern = "pattern='"+pattern+"'"}	
-	if(type == "phone"){var blur = "onblur='formatPhone(this);'"} else {var blur = ""}
+
+	var atku = "";
+	var blur = "";
+
+	if (req == 1) { atku = "onkeyup='atku(this);'" }
+	if (pattern != "") { pattern = "pattern='" + pattern + "'" }	
+	if (type == "phone") {blur = "onblur='formatPhone(this);'"}
+
 	return replace_all_array(_guest_input_row, {
 		did: did,
 		pid: pid,
@@ -12426,7 +12432,7 @@ function middleHandler_guest_code_check(req, res, next) {
 	//console.log("  middleHandler_guest_code_check " + req.query.id);						
 	var sql = _sql_db_check_guest_code.replace('@@code', req.query.id)
 	req.guest_code_pid = 0
-	req.guest_code_css_url = 'http://127.0.0.1:4349/GrandHotel/css/style.css'
+	//req.guest_code_css_url = 'http://127.0.0.1:4349/GrandHotel/css/style.css'
 	db.each(sql, function(err, row) {						
 		//todo add error handler		
 		req.guest_code_pid = row.autoID
@@ -12477,57 +12483,64 @@ restapi.get('/guest-login',
 	middleHandler_guest_custom,
 	
 	function(req, res){
-	//console.log('/guest-login '+req.query.id )
-	var html = "Error Guest Login2"
-	if(req.guest_code_pid > 0) {
-		var css = replace_all_array(_guest_gen_css, {id: req.query.id})	
-		var csslink = "<style>"+css+"</style>"
-		if(req.guest_code_css_url!=''){csslink = "<link href='"+req.guest_code_css_url+"' rel='stylesheet' type='text/css'>"}
-		var ps = req.query.id+'-0'
-		var eq = "[a-z0-9._%+-]+@[=a-z0-9.-]+\[a-z]{2,3}&#36;"; //&#36; replaces $
-		var inputs = guest_input(1, 2, ps, "fname", "First Name", "text", "", "First Name","")
-		//#append inputs [guest_input 0 3 $ps mi "Middle Initial" text "" ""]
-		inputs += guest_input(1, 3, ps, "lname", "Last Name", "text", "", "Last Name","")
-		inputs += guest_input(1, 4, ps, "room", "Room #", "text", "[0-9]{1-5}", "Room Number","")
-		inputs += guest_input(1, 5, ps, "lastfour", "Last Four", "text", "[0-9]{4,4}", "CC Last 4 Digits","style='display:none;'")
-		inputs += guest_input(1, 6, ps, "checkin", "Check In Date", "date", "\d{1,2}/\d{1/2}/\d{1,4}", "mm/dd/yyyy","")
-		inputs += guest_input(1, 7, ps, "checkout", "Check Out Date", "date", "\d{1,2}/\d{1/2}/\d{1,4}", "mm/dd/yyyy","")
-		inputs += guest_input(1, 8, ps, "email", "Email Address", "email", eq, "Enter your email address here","")
-		inputs += guest_input(1, 9, ps, "email2", "Re-Enter Email", "email", eq, "Re-enter your email address here","")
-	
-		inputs += guest_input(1, 10, ps, "phone", "Phone", "phone", "\d{3}[\-]\d{3}[\-]\d{4}", "Enter your phone number here","")
-	
-		var morebox = guest_input(1, 12, ps, "cancellation", "Confirmation #", "text", "", "","")
-		morebox += guest_input(1, 13, ps, "spg", "SPG #", "text", "", "")
-		morebox += guest_input(1, 14, ps, "amount", "Refund Requested", "number", "", "","")
-		
-		var displays = guest_display(ps, "itype", "Request Type")
-		displays += guest_display(ps, "name", "Name")
-		displays += guest_display(ps, "room", "Room")
-		displays += guest_display(ps, "lastfour", "CC Last 4 Digits")		
-		displays += guest_display(ps, "dates", "Dates")
-		displays += guest_display(ps, "email", "Email Address")
-		displays += guest_display(ps, "phone", "Phone")
+		//console.log('/guest-login '+req.query.id )
+		var html = "Error Guest Login2"
+		if(req.guest_code_pid > 0) {
 
-		var moredsp = guest_display(ps, "cancellation", "Confirmation #")
-		moredsp += guest_display(ps, "spg", "SPG #")
-		moredsp += guest_display(ps, "amount", "Refund Requested")
+			var css = replace_all_array(_guest_gen_css, {id: req.query.id})	
+			var csslink = "<style>" + css + "</style>"
 
+			if (req.guest_code_css_url!='') {
+				csslink = "<link href='"+req.guest_code_css_url+"' rel='stylesheet' type='text/css'>"
+			}
+
+			var ps = req.query.id+'-0'
+			var eq = "[a-z0-9._%+-]+@[=a-z0-9.-]+\[a-z]{2,3}&#36;"; //&#36; replaces $
+			var inputs = guest_input(1, 2, ps, "fname", "First Name", "text", "", "First Name","")
+
+			//#append inputs [guest_input 0 3 $ps mi "Middle Initial" text "" ""]
+			inputs += guest_input(1, 3, ps, "lname", "Last Name", "text", "", "Last Name","")
+			inputs += guest_input(1, 4, ps, "room", "Room #", "text", "[0-9]{1-5}", "Room Number","")
+			inputs += guest_input(1, 5, ps, "lastfour", "Last Four", "text", "[0-9]{4,4}", "CC Last 4 Digits","style='display:none;'")
+			inputs += guest_input(1, 6, ps, "checkin", "Check In Date", "date", "\d{1,2}/\d{1/2}/\d{1,4}", "mm/dd/yyyy","")
+			inputs += guest_input(1, 7, ps, "checkout", "Check Out Date", "date", "\d{1,2}/\d{1/2}/\d{1,4}", "mm/dd/yyyy","")
+			inputs += guest_input(1, 8, ps, "email", "Email Address", "email", eq, "Enter your email address here","")
+			inputs += guest_input(1, 9, ps, "email2", "Re-Enter Email", "email", eq, "Re-enter your email address here","")
 		
-		html = _guest_login_page.replace('@@js', _guest_login_js)
-		html = html.replace('@@inputs', inputs)
-		html = html.replace('@@morebox', morebox)
-		html = html.replace('@@displays', displays)
-		html = html.replace('@@moredsp', moredsp)
-		html = html.replace('@@para2', req.guest_custom_para2)
-		html = replace_all_array(html, {
-			ps: req.query.id+'-0',
-			csslink: csslink
-		})
+			inputs += guest_input(1, 10, ps, "phone", "Phone", "phone", "\d{3}[\-]\d{3}[\-]\d{4}", "Enter your phone number here","")
+		
+			var morebox = guest_input(1, 12, ps, "cancellation", "Confirmation #", "text", "", "","")
+			morebox += guest_input(1, 13, ps, "spg", "SPG #", "text", "", "")
+			morebox += guest_input(1, 14, ps, "amount", "Refund Requested", "number", "", "","")
+			
+			var displays = guest_display(ps, "itype", "Request Type")
+			displays += guest_display(ps, "name", "Name")
+			displays += guest_display(ps, "room", "Room")
+			displays += guest_display(ps, "lastfour", "CC Last 4 Digits")		
+			displays += guest_display(ps, "dates", "Dates")
+			displays += guest_display(ps, "email", "Email Address")
+			displays += guest_display(ps, "phone", "Phone")
+
+			var moredsp = guest_display(ps, "cancellation", "Confirmation #")
+			moredsp += guest_display(ps, "spg", "SPG #")
+			moredsp += guest_display(ps, "amount", "Refund Requested")
+
+			
+			html = _guest_login_page.replace('@@js', _guest_login_js)
+			html = html.replace('@@inputs', inputs)
+			html = html.replace('@@morebox', morebox)
+			html = html.replace('@@displays', displays)
+			html = html.replace('@@moredsp', moredsp)
+			html = html.replace('@@para2', req.guest_custom_para2)
+			html = replace_all_array(html, {
+				ps: req.query.id+'-0',
+				csslink: csslink
+			})
+		}
+		res.write(html)
+		res.end()
 	}
-	res.write(html)
-	res.end()
-})
+)
 
 const _sql_db_guest_validate_property = (function () {/*  
 	SELECT autoID as pid FROM properties WHERE hid = '@@prop'
