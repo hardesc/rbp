@@ -748,47 +748,147 @@ function cd(ar){
 function ar(a,x){return a[x]}
 
 //set display of array to 'inline'
-function sdi(t,v){var e=gebi(t);if(e){e=replaceHtml(e,v);dspArray(t,'inline');}}
-function sdh(t,v){var e=gebi(t);if(e){e=replaceHtml(e,v);sdtn(t);}}
-function sib(t,v){var e=gebi(t);if(e){e=replaceHtml(e,v);dspArray(t,'inline-block');}}
-function skb(t,v){var e=gebi(t);if(e){e=replaceHtml(e,v);dspArray(t,'block');}}
-function skd(t,v){var e=gebi(t);if(e){e=replaceHtml(e,v);dspArray(t,'');}}
-function gdi(t){var e=gebi(t);if(e){return gebi(t).innerHTML;}else{return null;}}
-function gdv(t){var e=gebi(t);if(e){return gebi(t).value;}else{return null;}}
-function gedv(t){console.log(t);if(t==null){t=""};return encode(gdv(t))}
-function sdv(t,v){var e=gebi(t);if(e){gebi(t).value=v;}}
-function replaceHtml(e,h) {var oe=typeof e==='string'?gebi(e):e;var ne=oe.cloneNode(false);ne.innerHTML=h;oe.parentNode.replaceChild(ne,oe);return ne;};
-function trim(str){return str.replace(/^\\s\\s*/, '').replace(/\\s\\s*$/, '');}
-function sC(id,cls){var e=gebi(id);if(e){e.setAttribute('class',cls);e.setAttribute('className',cls);}else {alert(id + ' js error');}}
-function aC(id,cls){var e=gebi(id);if(e){var s=e.getAttribute('class'); e.setAttribute('class',s+' '+cls);e.setAttribute('className',s+' '+cls);}}
-function gC(id){var e=gebi(id);var c = e.getAttribute('class'); if (c == null) {return ''}; return trim(c);}
-function rC(id,cls){
-	console.log(id + ' ' + cls)
-	var e=gebi(id);
-	if(e){
-		if(e.getAttribute('class').length>0){
-			var ca=e.getAttribute('class').split(' ');
-			var nc='';
-			for(var x=0;x<ca.length;x++){
-				if(ca[x]==cls){
-				
-				} else {
+function sdi(t,v){
+
+	var e = gebi(t);
+	if (e) {
+		e = replaceHtml(e,v);
+		dspArray(t,'inline');
+	}
+}
+
+function sdh(t,v) {
+
+	var e = gebi(t);
+	if(e) {
+		e = replaceHtml(e,v);
+		sdtn(t);
+	}
+}
+
+function sib(t,v) {
+
+	var e = gebi(t);
+	if (e) {
+		e = replaceHtml(e,v);
+		dspArray(t,'inline-block');
+	}
+}
+
+function skb(t,v) {
+
+	var e = gebi(t);
+	if (e) {
+		e = replaceHtml(e,v);
+		dspArray(t,'block');
+	}
+}
+
+function skd(t,v) {
+
+	var e = gebi(t);
+	if (e) {
+		e = replaceHtml(e,v);
+		dspArray(t,'');
+	}
+}
+
+function gdi(t) {
+
+	var e = gebi(t);
+	if(e) {
+		return gebi(t).innerHTML;
+	}
+	else {return null;}
+}
+
+function gdv(t) {
+	var e = gebi(t);
+	if (e) {
+		return gebi(t).value;
+	}
+	else {return null;}
+}
+
+function gedv(t) {
+
+	console.log(t);
+	if (t==null) {
+		t = "";
+	}
+	return encode(gdv(t))
+}
+
+function sdv(t,v) {
+	var e = gebi(t);
+	if (e) {
+		gebi(t).value = v;
+	}
+}
+
+function replaceHtml(e,h) {
+	var oe = typeof e==='string'? gebi(e) : e;
+	var ne = oe.cloneNode(false);
+	ne.innerHTML = h;
+	oe.parentNode.replaceChild(ne,oe);
+	return ne;
+}
+
+function trim(str) {
+	return str.replace(/^\\s\\s*/, '').replace(/\\s\\s*$/, '');
+}
+
+function sC(id,cls) {
+	var e = gebi(id);
+	if (e) {
+		e.setAttribute('class',cls);
+		e.setAttribute('className',cls);
+	}
+	else {alert(id + ' js error');}
+}
+
+function aC(id,cls) {
+	var e = gebi(id);
+	if (e) {
+		var s = e.getAttribute('class');
+		e.setAttribute('class',s+' '+cls);
+		e.setAttribute('className',s+' '+cls);
+	}
+}
+
+function gC(id) {
+	var e = gebi(id);
+	var c = e.getAttribute('class');
+	if (c == null) {return '';}
+	return trim(c);
+}
+
+function rC(id,cls) {
+	console.log(id + ' ' + cls);
+	var e = gebi(id);
+	if(e) {
+		if (e.getAttribute('class').length > 0) {
+			var ca = e.getAttribute('class').split(' ');
+			var nc = '';
+			for (var x = 0; x < ca.length; x++) {
+				if(ca[x] != cls) {
 					nc = nc + ca[x] + ' ';
 				}
-			};
-			sC(id,nc);
+			}
+			sC(id, nc);
 		}
 	}
 }
+
 function hC(e,cls){
-	if(e){
+	if(e) {
 		var ca = e.getAttribute('class').split(" ");
-		for (var x=0;x<ca.length;x++){
-			if (ca[x]==cls){return true}
+		for (var x = 0; x < ca.length; x++) {
+			if (ca[x] == cls) {return true}
 		}
 		var ca = e.getAttribute('className').split(" ");
-		for (var x=0;x<ca.length;x++){
-			if (ca[x]==cls){return true}
+		for (var x = 0; x < ca.length; x++) {
+			if (ca[x] == cls) {return true}
 		}		
 	}
 	return false;
