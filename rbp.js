@@ -5151,9 +5151,7 @@ const _guest_login_js = (function () {/*
 
 const _guest_login_page = (function () {/*  	
 <html><head><title></title>
-	<script>
-	@@js
-	</script>
+	<script type="text/javascript" src="/js/guest_login.js"></script>
 	@@csslink
 	</head><body>
 	<div id="guest-instructions" class="instructions">
@@ -5183,7 +5181,7 @@ const _guest_login_page = (function () {/*
 			</div>
 			@@morebox
 						
-			<button class='cls-ticket-button-submit-@@ps' onclick='event.preventDefault();sendrequest();' taborder='14'>Submit </button>
+			<button class='cls-ticket-button-submit-@@ps' onclick='event.preventDefault();sendrequest(@@ps);' taborder='14'>Submit </button>
 		</div>
 		<div id='guest-ticket-display' style='display:none;'>
 			@@displays
@@ -5197,7 +5195,7 @@ const _guest_login_page = (function () {/*
 		
 			<div id='guest-ticket-buttons'>
 				<button class='cls-ticket-button-back-@@ps' onclick='event.preventDefault();sendreqback();'>Back </button>
-				<button class='cls-ticket-button-submit2-@@ps' onclick='event.preventDefault();sendrequest2();'>Submit Inquiry Now</button>
+				<button class='cls-ticket-button-submit2-@@ps' onclick='event.preventDefault();sendrequest2(@@ps);'>Submit Inquiry Now</button>
 			</div>
 			<div id='guest-ticket-working-@@ps' style='display:none;' >
 				<div class='cls-ticket-working2-@@ps'>Working, please wait...</div>
@@ -12487,9 +12485,13 @@ restapi.get('/guest-login',
 		var html = "Error Guest Login2"
 		if(req.guest_code_pid > 0) {
 
+			//as default, set HTML <style> element to css string to _guest_gen_css with propID in place of @@id
 			var css = replace_all_array(_guest_gen_css, {id: req.query.id})	
 			var csslink = "<style>" + css + "</style>"
 
+			//if there is an entry in the database for db.properties.css_url (currently only used with demo for Grand Hotel)
+				//then sets the HTML css to the url given there, which points to a .css file. 
+				//this db entry is queried in middleHandler_guest_code_check
 			if (req.guest_code_css_url!='') {
 				csslink = "<link href='"+req.guest_code_css_url+"' rel='stylesheet' type='text/css'>"
 			}
@@ -12498,7 +12500,9 @@ restapi.get('/guest-login',
 			var eq = "[a-z0-9._%+-]+@[=a-z0-9.-]+\[a-z]{2,3}&#36;"; //&#36; replaces $
 			var inputs = guest_input(1, 2, ps, "fname", "First Name", "text", "", "First Name","")
 
-			//#append inputs [guest_input 0 3 $ps mi "Middle Initial" text "" ""]
+
+			//
+			//TODO (from DD) #append inputs [guest_input 0 3 $ps mi "Middle Initial" text "" ""]
 			inputs += guest_input(1, 3, ps, "lname", "Last Name", "text", "", "Last Name","")
 			inputs += guest_input(1, 4, ps, "room", "Room #", "text", "[0-9]{1-5}", "Room Number","")
 			inputs += guest_input(1, 5, ps, "lastfour", "Last Four", "text", "[0-9]{4,4}", "CC Last 4 Digits","style='display:none;'")
@@ -12526,8 +12530,8 @@ restapi.get('/guest-login',
 			moredsp += guest_display(ps, "amount", "Refund Requested")
 
 			
-			html = _guest_login_page.replace('@@js', _guest_login_js)
-			html = html.replace('@@inputs', inputs)
+			//html = _guest_login_page.replace('@@js', _guest_login_js)
+			html = _guest_login_page.replace('@@inputs', inputs)
 			html = html.replace('@@morebox', morebox)
 			html = html.replace('@@displays', displays)
 			html = html.replace('@@moredsp', moredsp)

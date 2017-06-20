@@ -152,9 +152,11 @@ function dlgfilecheck(){
 	}
 }
 
-
-function atku(e){
-	if(gdv(e.id).length>0){e.style.borderColor=""}
+//normally used for js onkeyup event (hence "atku")... if element found by id and has value, set the borderColor to ""
+//input = HTML element
+//output = if element's value length > 0, change style.borderColor to ""
+function atku(e) {
+	if (gdv(e.id).length > 0) { e.style.borderColor="" }
 }
 
 var _emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
@@ -802,6 +804,7 @@ function gdi(t) {
 	else {return null;}
 }
 
+//return value of HTML element by id; if no element found by id, return null
 function gdv(t) {
 	var e = gebi(t);
 	if (e) {
