@@ -20,6 +20,7 @@ var _adminemail = env.admin_email
 var crypto = require('crypto');
 var zlib = require('zlib');
 var express = require('express');
+var swig = require('swig');
 var multer  = require('multer');
 var get = require('get-parameter-names')
 var request = require('request');
@@ -81,12 +82,14 @@ db.serialize(function() {
 	db.run("create table if not exists blog (autoID INTEGER PRIMARY KEY, userid INTEGER, ukey TEXT, title TEXT, date TEXT, imagefile TEXT, intropara TEXT, fulltext TEXT, visible INTEGER)"); //use alter
 });
 
-var express = require('express');
 var restapi = express();
 restapi.use(express.static(path.join(__dirname, '/public')));
 
 //setting 'views' path to html folder
 restapi.set('views', path.join(__dirname, '/html'));
+
+swig = swig.Swig();
+restapi.set('view engine', 'html');
 
 if (env.env == 'development') {
     console.log('runnign development')
@@ -4939,215 +4942,373 @@ const _guest_gen_page = (function () {/*
 	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
 
 const _guest_login_js = (function () {/*  	
-	function atku(e){
-			if(e.value.length>0){e.style.borderColor=""}
-		}
+	function atku(e) {
+		if (e.value.length > 0) {e.style.borderColor = ""}
+	}
 
-		var submit_req = ""
+	var submit_req = ""
 		
-		function encode(s){
-			if(s.length == 0 || s == null){return ""}
-			var c='';
-			var o='';
-			for(var i=0;i<s.length;i++){
-				c = s.charCodeAt(i).toString(); 
-				if(c.length>3){			
-					if(c==8211 || c==8212){c = '045'}
-					else if(c==8216 || c==8217){c = '039'}
-					else if(c==8218 || c==8222){c = '044'}
-					else if(c==8220 || c==8221){c = '034'}			
-					else {c = (' ').charCodeAt(0).toString()} 
-				}
-				while ( c.length < 3) {c = '0' + c;}		
-				o += c;
-			};
-			return o;
+	function encode(s){
+		if (s.length == 0 || s == null) {return ""}
+		var c = '';
+		var o = '';
+		for (var i = 0; i < s.length; i++) {
+			c = s.charCodeAt(i).toString(); 
+			if (c.length > 3 ){			
+				if (c == 8211 || c == 8212) {c = '045'}
+				else if (c == 8216 || c == 8217) {c = '039'}
+				else if (c == 8218 || c == 8222) {c = '044'}
+				else if (c == 8220 || c == 8221) {c = '034'}			
+				else {c = (' ').charCodeAt(0).toString()} 
+			}
+			while ( c.length < 3) {c = '0' + c;}		
+			o += c;
+		};
+		return o;
+	}
+
+	function sendrequest() {
+
+		var ps = '@@ps';
+		var er = false;
+		var ex = ""
+		var et = "ticket.tk.itype."+ps
+		var tkit = parseInt(document.getElementById(et).value);
+
+		if (tkit==0) {
+			er = true;
+			addClass(et,"error")
+		}
+		else { removeClass(et,"error") }
+		
+		var et = "ticket.tk.fname." + ps;
+		var eter = et + ".er"			
+		var tkfn = document.getElementById(et).value;
+
+		if (tkfn.length == 0) {
+			er = true;
+			addClass(et,"error");
+			addClass(eter,"show");
+		}
+		else {
+			removeClass(et,"error");
+			removeClass(eter,"show");
+		}
+		
+		var tkmi='';
+		
+		var et = "ticket.tk.lname." + ps;
+		var eter = et + ".er"
+		var tkln = document.getElementById(et).value;
+
+		if (tkln.length == 0) {
+			er = true;
+			addClass(et,"error");
+			addClass(eter,"show");
+		}
+		else {
+			removeClass(et,"error");
+			removeClass(eter,"show");
+		}
+		
+		var et = "ticket.tk.room."+ps; 	
+		var tkrn = document.getElementById(et).value;
+		
+		var et = "ticket.tk.checkin." + ps;
+		var eter = et + ".er"
+		var tkci = document.getElementById(et).value;	
+		if (tkci != "") {
+			var d = new Date(tkci);	
+			if (d.toString() === 'Invalid Date' || d.getFullYear() < 2015 || isNaN(d.getFullYear())) {
+				er=true;
+				addClass(et,"error");
+				addClass(eter,"show");
+				ex = ex + " Dates should be entered as mm/dd/yyyy.";
+			}
+			else {
+				removeClass(et,"error");
+				removeClass(eter,"show");
+			}
+		}
+			
+		var et = "ticket.tk.checkout." + ps;
+		var eter = et + ".er"			
+		var tkco = document.getElementById(et).value;
+		if (tkco != "") {
+			var d = new Date(tkco);	
+			if (d.toString() === 'Invalid Date' || d.getFullYear() < 2015 || isNaN(d.getFullYear())) {
+				er = true;
+				addClass(et, "error");
+				addClass(eter, "show");
+				ex = ex + " Dates should be entered as mm/dd/yyyy."
+			}
+			else {
+				removeClass(et, "error");
+				removeClass(eter, "show");
+			}
+		}
+		
+		var em = "ticket.tk.email." + ps;
+		var eter = em +".er"
+		var tkem = document.getElementById(em).value;
+
+		if (tkem.length == 0) {
+			er=true;
+			addClass(em, "error");
+			addClass(eter, "show");
+		}
+		else {removeClass(em, "error");
+			removeClass(eter, "show");
 		}
 
-			function sendrequest(){
-				var ps = '@@ps';
-				var er = false;
-				var ex = ""
-				var et = "ticket.tk.itype."+ps
-				var tkit=parseInt(document.getElementById(et).value);
-				if(tkit==0){er=true;addClass(et,"error")}else{removeClass(et,"error")}
-				
-				var et = "ticket.tk.fname."+ps; var eter = et+".er"			
-				var tkfn=document.getElementById(et).value;
-				if(tkfn.length==0){er=true;addClass(et,"error");addClass(eter,"show");}else{removeClass(et,"error");removeClass(eter,"show");}
-				
-				var tkmi='';
-				
-				var et = "ticket.tk.lname."+ps; var eter = et+".er"
-				var tkln=document.getElementById(et).value;
-				if(tkln.length==0){er=true;addClass(et,"error");addClass(eter,"show");}else{removeClass(et,"error");removeClass(eter,"show");}
-				
-				var et = "ticket.tk.room."+ps; 	
-				var tkrn=document.getElementById(et).value;
-				
-				var et = "ticket.tk.checkin."+ps; var eter = et+".er"
-				var tkci=document.getElementById(et).value;	
-				if(tkci!=""){
-					var d = new Date(tkci);	
-					if(d.toString()==='Invalid Date' || d.getFullYear() < 2015 || isNaN(d.getFullYear())){
-						er=true;addClass(et,"error");addClass(eter,"show");
-						ex = ex + " Dates should be entered as mm/dd/yyyy."
-					}else{
-						removeClass(et,"error");removeClass(eter,"show");
-					}
-				}
-				
-							
-				var et = "ticket.tk.checkout."+ps; var eter = et+".er"			
-				var tkco=document.getElementById(et).value;
-				if(tkco!=""){
-					var d = new Date(tkco);	
-					if(d.toString()==='Invalid Date' || d.getFullYear() < 2015 || isNaN(d.getFullYear())){
-						er=true;addClass(et,"error");addClass(eter,"show");
-						ex = ex + " Dates should be entered as mm/dd/yyyy."
-					}else{
-						removeClass(et,"error");removeClass(eter,"show");
-					}
-				}
-				
-				var em = "ticket.tk.email."+ps; var eter = em+".er"
-				var tkem=document.getElementById(em).value;
-				if(tkem.length==0){er=true;addClass(em,"error");addClass(eter,"show");}else{removeClass(em,"error");removeClass(eter,"show");}
-				if(tkem.toLowerCase()=="na@na.com" || tkem.toLowerCase()=="no@notgiven.com"){er=true;addClass(em,"error");addClass(eter,"show");}else{removeClass(em,"error");removeClass(eter,"show");}
-				
-				var rm = "ticket.tk.email2."+ps; var eter = rm+".er"
-				var tkrm=document.getElementById(rm).value;
-				if(tkrm.length==0){er=true;
-					addClass(rm,"error");addClass(eter,"show");
-					ex = ex + " Please use a real email address name."
-				}
-				
-				if(tkem!=tkrm){er=true;
-					addClass(em,"error");
-					addClass(rm,"error");
-				}
-				
-				var et = "ticket.tk.phone."+ps; var eter = et+".er"
-				var tkph=document.getElementById(et).value;
-				if(tkph.length==0){er=true;addClass(et,"error");addClass(eter,"show");}else{removeClass(et,"error");removeClass(eter,"show");}
-				
-				var et = "ticket.tk.desc."+ps; var eter = et+".er"
-				var tkds=document.getElementById(et).value
-				tkds=tkds.replace(/(\d) (\d)/g, "");
-				tkds=tkds.replace(/(\d)-(\d)/g, "");
-				tkds=tkds.replace(/\d(?=\d{4})/g, "*");
-				if(tkds.length==0){er=true;addClass(et,"error");addClass(eter,"show");}else{removeClass(et,"error");removeClass(eter,"show");}
-				
-				
-				//var et = "ticket.tk.create."+ps
-				var tkcr="false";
-				
-				var et = "ticket.tk.cancellation."+ps
-				var tkca=document.getElementById(et).value;
-				
-				var et = "ticket.tk.spg."+ps
-				var tksp=document.getElementById(et).value;
-				
-				var et = "ticket.tk.amount."+ps
-				var tkam=document.getElementById(et).value;
-				
-				var cc = document.getElementById("ticket.tk.itype."+ps).value;
-				var et = "ticket.tk.lastfour."+ps; var eter = et+".er"
-				var tkcc=document.getElementById(et).value;
-				if(cc==1){
-					if(tkcc.length != 4){er=true;addClass(et,"error");addClass(eter,"show");}else{removeClass(et,"error");removeClass(eter,"show");}						
-				}
-				
-				if(er==true){alert("Some of the form fields were not filled out completely.  The items outlined in red are required."+ex+" Please try again.");return;}
-				submit_req = '/guest-request?ty='+tkit+'&ps='+ps+'&it='+tkit+'&fn='+encode(tkfn)+'&mi='+encode(tkmi)+'&ln='+encode(tkln)+'&rn='+encode(tkrn)+'&ci='+tkci+'&co='+tkco+'&em='+tkem+'&rm='+tkrm+'&cr='+tkcr+'&ph='+tkph+'&ds='+tkds+'&ca='+encode(tkca)+'&sp='+encode(tksp)+'&am='+tkam+'&cc='+encode(tkcc);
-				
-				document.getElementById("display.tk.itype."+ps).innerHTML = document.getElementById("ticket.tk.itype."+ps)[document.getElementById("ticket.tk.itype."+ps).value].text;
-				document.getElementById("display.tk.name."+ps).innerHTML = document.getElementById("ticket.tk.fname."+ps).value + " " + document.getElementById("ticket.tk.lname."+ps).value;
-				if(document.getElementById("ticket.tk.room."+ps).value==''){
-					document.getElementById("display.tk.room."+ps).innerHTML = "Not Provided"
-				}else{
-					document.getElementById("display.tk.room."+ps).innerHTML = document.getElementById("ticket.tk.room."+ps).value;
-				}
-				
-				if(document.getElementById("ticket.tk.lastfour."+ps).value==''){
-					document.getElementById("display.tk.lastfour."+ps).innerHTML = "N/A"
-				}else{
-					document.getElementById("display.tk.lastfour."+ps).innerHTML = document.getElementById("ticket.tk.lastfour."+ps).value;
-				}
-				
-				if(document.getElementById("ticket.tk.checkin."+ps).value=='' && document.getElementById("ticket.tk.checkout."+ps).value==''){
-					document.getElementById("display.tk.dates."+ps).innerHTML = "Not Provided"
-				}else{
-					document.getElementById("display.tk.dates."+ps).innerHTML = document.getElementById("ticket.tk.checkin."+ps).value + " to " + document.getElementById("ticket.tk.checkout."+ps).value;
-				}
-				document.getElementById("display.tk.email."+ps).innerHTML = document.getElementById("ticket.tk.email."+ps).value;
-				
-				//if(document.getElementById("ticket.tk.create."+ps).checked){
-				//	document.getElementById("display.tk.create."+ps).innerHTML = "Yes, an account will be created"
-				//}else{
-				//	document.getElementById("display.tk.create."+ps).innerHTML = "No, an account will not be created"
-				//}
-				
-				document.getElementById("display.tk.phone."+ps).innerHTML = document.getElementById("ticket.tk.phone."+ps).value;
-				document.getElementById("display.tk.desc."+ps).innerHTML = tkds
-				document.getElementById("display.tk.cancellation."+ps).innerHTML = document.getElementById("ticket.tk.cancellation."+ps).value;
-				document.getElementById("display.tk.spg."+ps).innerHTML = document.getElementById("ticket.tk.spg."+ps).value;
-				document.getElementById("display.tk.amount."+ps).innerHTML = document.getElementById("ticket.tk.amount."+ps).value;
-				
-				document.getElementById("guest-ticket-fields").style.display = "none";
-				document.getElementById("guest-ticket-display").style.display = "";
-				document.getElementById("guest-instructions").style.display = "none";
+		if (tkem.toLowerCase() == "na@na.com" || tkem.toLowerCase() == "no@notgiven.com") {
+			er = true;
+			addClass(em, "error");
+			addClass(eter, "show");
+		}
+		else {removeClass(em, "error");
+			removeClass(eter, "show");
+		}
+		
+		var rm = "ticket.tk.email2."+ps;
+		var eter = rm + ".er"
+		var tkrm = document.getElementById(rm).value;
+		if (tkrm.length == 0) {
+			er = true;
+			addClass(rm, "error");
+			addClass(eter, "show");
+			ex = ex + " Please use a real email address name."
+		}
+		
+		if (tkem != tkrm) {
+			er = true;
+			addClass(em, "error");
+			addClass(rm, "error");
+		}
+		
+		var et = "ticket.tk.phone." + ps;
+		var eter = et + ".er"
+		var tkph = document.getElementById(et).value;
+
+		if (tkph.length == 0) {
+			er = true;
+			addClass(et, "error");
+			addClass(eter, "show");
+		}
+		else {
+			removeClass(et, "error");
+			removeClass(eter, "show");
+		}
+		
+		var et = "ticket.tk.desc." + ps;
+		var eter = et + ".er"
+		var tkds = document.getElementById(et).value
+
+		tkds = tkds.replace(/(\d) (\d)/g, "");
+		tkds = tkds.replace(/(\d)-(\d)/g, "");
+		tkds = tkds.replace(/\d(?=\d{4})/g, "*");
+
+		if (tkds.length == 0) {
+			er = true;
+			addClass(et, "error");
+			addClass(eter, "show");
+		}
+		else {
+			removeClass(et, "error");
+			removeClass(eter, "show");
+		}
+		
+		
+		//var et = "ticket.tk.create."+ps
+		var tkcr="false";
+		
+		var et = "ticket.tk.cancellation." + ps
+		var tkca = document.getElementById(et).value;
+		
+		var et = "ticket.tk.spg." + ps
+		var tksp = document.getElementById(et).value;
+		
+		var et = "ticket.tk.amount." + ps
+		var tkam = document.getElementById(et).value;
+		
+		var cc = document.getElementById("ticket.tk.itype." + ps).value;
+		var et = "ticket.tk.lastfour." + ps;
+		var eter = et + ".er"
+		var tkcc = document.getElementById(et).value;
+
+		if (cc == 1) {
+			if (tkcc.length != 4) {
+				er = true;
+				addClass(et, "error");
+				addClass(eter, "show");
 			}
+			else {
+				removeClass(et, "error");
+				removeClass(eter, "show");
+			}						
+		}
+		
+		if (er == true) {
+			alert(
+			 "Some of the form fields were not filled out completely.  The items outlined in red are required."
+			 + ex 
+			 + " Please try again."
+			 );
+			return;
+		}
+
+		submit_req = '/guest-request?ty='
+		 + tkit 
+		 + '&ps=' + ps 
+		 + '&it=' + tkit
+		 + '&fn=' + encode(tkfn)
+		 + '&mi=' + encode(tkmi)
+		 + '&ln=' + encode(tkln)
+		 + '&rn=' + encode(tkrn)
+		 + '&ci=' + tkci
+		 + '&co=' + tkco
+		 + '&em=' + tkem
+		 + '&rm=' + tkrm
+		 + '&cr=' + tkcr
+		 + '&ph=' + tkph
+		 + '&ds=' + tkds
+		 + '&ca=' + encode(tkca)
+		 + '&sp=' + encode(tksp)
+		 + '&am=' + tkam
+		 + '&cc=' + encode(tkcc);
+		
+		document.getElementById("display.tk.itype." + ps).innerHTML = 
+			document.getElementById("ticket.tk.itype." + ps)[document.getElementById("ticket.tk.itype."+ps).value].text;
+		document.getElementById("display.tk.name."+ps).innerHTML = 
+			document.getElementById("ticket.tk.fname."+ps).value + " " + document.getElementById("ticket.tk.lname."+ps).value;
+
+		if (document.getElementById("ticket.tk.room." + ps).value == '') {
+			document.getElementById("display.tk.room."+ ps ).innerHTML = "Not Provided"
+		}
+		else {
+			document.getElementById("display.tk.room." + ps).innerHTML = document.getElementById("ticket.tk.room." + ps).value;
+		}
+		
+		if (document.getElementById("ticket.tk.lastfour." + ps).value == '') {
+			document.getElementById("display.tk.lastfour." + ps).innerHTML = "N/A"
+		}
+		else {
+			document.getElementById("display.tk.lastfour." + ps).innerHTML = 
+				document.getElementById("ticket.tk.lastfour." + ps).value;
+		}
+		
+		if(document.getElementById("ticket.tk.checkin." + ps).value == '' 
+		&& document.getElementById("ticket.tk.checkout."+ps).value == '') {
+			document.getElementById("display.tk.dates." + ps).innerHTML = "Not Provided"
+		}
+		else {
+			document.getElementById("display.tk.dates." + ps).innerHTML = 
+				document.getElementById("ticket.tk.checkin." + ps).value 
+				+ " to " + document.getElementById("ticket.tk.checkout."+ps).value;
+		}
+		document.getElementById("display.tk.email." + ps).innerHTML = 
+			document.getElementById("ticket.tk.email." + ps).value;
+		
+		//if(document.getElementById("ticket.tk.create."+ps).checked){
+		//	document.getElementById("display.tk.create."+ps).innerHTML = "Yes, an account will be created"
+		//}else{
+		//	document.getElementById("display.tk.create."+ps).innerHTML = "No, an account will not be created"
+		//}
+		
+		document.getElementById("display.tk.phone." + ps).innerHTML = 
+			document.getElementById("ticket.tk.phone." + ps).value;
+		document.getElementById("display.tk.desc." + ps).innerHTML = tkds
+		document.getElementById("display.tk.cancellation." + ps).innerHTML = 
+			document.getElementById("ticket.tk.cancellation." + ps).value;
+		document.getElementById("display.tk.spg." + ps).innerHTML = 
+			document.getElementById("ticket.tk.spg." + ps).value;
+		document.getElementById("display.tk.amount." + ps).innerHTML = 
+			document.getElementById("ticket.tk.amount." + ps).value;
+		
+		document.getElementById("guest-ticket-fields").style.display = "none";
+		document.getElementById("guest-ticket-display").style.display = "";
+		document.getElementById("guest-instructions").style.display = "none";
+	}
 			
 		
-		function sendreqback(){
+	function sendreqback(){
+		document.getElementById("guest-ticket-fields").style.display = "";
+		document.getElementById("guest-ticket-display").style.display = "none";
+		document.getElementById("guest-instructions").style.display = "";
+	}
+		
+	function sendrequest2(){
+		document.getElementById("guest-ticket-buttons").style.display = "none";
+		document.getElementById("guest-ticket-working-@@ps").style.display = "";
+		var a=_z(submit_req);a.onreadystatechange=function(){if(a.readyState==4){
+		var ra = a.responseText.split('::::')
+		if(ra[0]=='success'){
+			document.getElementById("guest-ticket-fields").innerHTML = ra[1];
 			document.getElementById("guest-ticket-fields").style.display = "";
 			document.getElementById("guest-ticket-display").style.display = "none";
-			document.getElementById("guest-instructions").style.display = "";
+			document.getElementById("guest-instructions").style.display = "none";
+			window.scrollTo(0,0);
+		} else {
+			document.getElementById("guest-ticket-buttons").style.display = "";
+			document.getElementById("guest-ticket-working-@@ps").style.display = "none";
+			document.getElementById("guest-instructions").style.display = "";				
+			alert(ra[1])
 		}
+	}};_h(a);}
 		
-		function sendrequest2(){
-			document.getElementById("guest-ticket-buttons").style.display = "none";
-			document.getElementById("guest-ticket-working-@@ps").style.display = "";
-			var a=_z(submit_req);a.onreadystatechange=function(){if(a.readyState==4){
-			var ra = a.responseText.split('::::')
-			if(ra[0]=='success'){
-				document.getElementById("guest-ticket-fields").innerHTML = ra[1];
-				document.getElementById("guest-ticket-fields").style.display = "";
-				document.getElementById("guest-ticket-display").style.display = "none";
-				document.getElementById("guest-instructions").style.display = "none";
-				window.scrollTo(0,0);
-			} else {
-				document.getElementById("guest-ticket-buttons").style.display = "";
-				document.getElementById("guest-ticket-working-@@ps").style.display = "none";
-				document.getElementById("guest-instructions").style.display = "";				
-				alert(ra[1])
-			}
-		}};_h(a);}
-		
-		function _z(f){var a;f += '&rnd=' + Math.floor(Math.random()*99999);try{ a=new XMLHttpRequest();} catch (e1){try{ a=new ActiveXObject('Msxml2.XMLHTTP');} catch (e2) {try{ a=new ActiveXObject('Microsoft.XMLHTTP');} catch (e3){alert('ERR!');return false;} } } try{ a.open('GET',f);}catch (e4) {alert(e4);alert(f);return false;};return a;}
-		function _h(a){a.setRequestHeader('Content-type','application/x-www-form-urlencoded');a.send();}
-		function addClass(id,cls){
-			var e=document.getElementById(id);
-			if(e){var s=e.getAttribute('class'); 
-				e.setAttribute('class',s+' '+cls);
-				e.setAttribute('className',s+' '+cls);
-			}
+	function _z(f) {
+		var a;
+		f += '&rnd=' + Math.floor(Math.random() * 99999);
+		try { a = new XMLHttpRequest();} 
+		catch (e1) {
+			try { a = new ActiveXObject('Msxml2.XMLHTTP');} 
+			catch (e2) {
+				try { 
+					a = new ActiveXObject('Microsoft.XMLHTTP');
+				} catch (e3) {
+					alert('ERR!');
+					return false;
+				} 
+			} 
+		} 
+		try { a.open('GET',f);}
+		catch (e4) {
+			alert(e4);
+			alert(f);
+			return false;
+		};
+		return a;
+	}
+
+	function _h(a) {
+		a.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+		a.send();
+	}
+
+	function addClass(id,cls) {
+		var e = document.getElementById(id);
+		if (e) {
+			var s = e.getAttribute('class'); 
+			e.setAttribute('class', s + ' ' + cls);
+			e.setAttribute('className', s + ' ' + cls);
 		}
-		function removeClass(id,cls){
-			var e=document.getElementById(id);
-			var ea = e.getAttribute('class').split(' ');
-			var nc = [];
-			for(var x=0;x<ea.length;x++){
-				if(ea[x]!=cls){nc.push(ea[x])}
-			}
-			if(e){ 
-				var nct = nc.join(' ');
-				e.setAttribute('class',nct);
-				e.setAttribute('className',nct);
-			}
+	}
+
+	function removeClass(id, cls) {
+		var e = document.getElementById(id);
+		var ea = e.getAttribute('class').split(' ');
+		var nc = [];
+		for (var x = 0; x < ea.length; x++) {
+			if (ea[x] != cls) {nc.push(ea[x])}
 		}
-	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+
+		if(e){ 
+			var nct = nc.join(' ');
+			e.setAttribute('class',nct);
+			e.setAttribute('className',nct);
+		}
+	}
+*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
 
 const _guest_login_page = (function () {/*  	
 <html><head><title></title>
@@ -5161,7 +5322,7 @@ const _guest_login_page = (function () {/*
 	<form id='guest-ticket' action='javascript:void(0);'>
 		<div id='guest-ticket-fields'>			
 			<label class="cls-ticket-label-itype-@@ps" for="ticket.tk.itype.@@ps">Request Type</label>
-			<div><select class="cls-ticket-select-itype-@@ps" id="ticket.tk.itype.@@ps" taborder="1" onChange="
+			<div><select class="cls-ticket-select-itype-@@ps" id="ticket.tk.itype.@@ps" tabindex="1" onChange="
 				if(this.value==1){
 					document.getElementById('div-ticket-div-lastfour-@@ps').style.display = '';
 				} else {
@@ -5176,31 +5337,32 @@ const _guest_login_page = (function () {/*
 			@@inputs	
 			<label class="cls-ticket-label-desc-@@ps" for="ticket.tk.desc.@@ps">Please write a message for the Hotel Staff</label>
 			<div>
-				<textarea class="cls-ticket-textarea-desc-@@ps" id='ticket.tk.desc.@@ps' name='ticket.tk.desc.@@ps' spellcheck='true' placeholder='Describe your inquiry here' taborder='13'></textarea>
+				<textarea class="cls-ticket-textarea-desc-@@ps" id='ticket.tk.desc.@@ps' name='ticket.tk.desc.@@ps' spellcheck='true' placeholder='Describe your inquiry here' tabindex='13'></textarea>
 				<label class="cls-ticket-error-desc-@@ps" id="ticket.tk.desc.@@ps.er"></label>
 			</div>
 			@@morebox
-						
-			<button class='cls-ticket-button-submit-@@ps' onclick='event.preventDefault();sendrequest(@@ps);' taborder='14'>Submit </button>
+		<div>				
+			<button class='cls-ticket-button-submit-@@ps' onclick='event.preventDefault();sendrequest(@@ps);' tabindex='14'>Submit </button>
 		</div>
 		<div id='guest-ticket-display' style='display:none;'>
 			@@displays
-			<label class="cls-display-label-desc-@@ps">Message for the Hotel Staff</label>
-			<div>
-				<textarea class="cls-display-textarea-desc-@@ps" id='display.tk.desc.@@ps'></textarea>
-			</div>
-			@@moredsp
-			
-			<div class='cls-guest-confirm-@@ps'>@@para2</div>
-		
-			<div id='guest-ticket-buttons'>
-				<button class='cls-ticket-button-back-@@ps' onclick='event.preventDefault();sendreqback();'>Back </button>
-				<button class='cls-ticket-button-submit2-@@ps' onclick='event.preventDefault();sendrequest2(@@ps);'>Submit Inquiry Now</button>
-			</div>
-			<div id='guest-ticket-working-@@ps' style='display:none;' >
-				<div class='cls-ticket-working2-@@ps'>Working, please wait...</div>
-			</div>
 		</div>
+		<label class="cls-display-label-desc-@@ps">Message for the Hotel Staff</label>
+		<div>
+			<textarea class="cls-display-textarea-desc-@@ps" id='display.tk.desc.@@ps'></textarea>
+		</div>
+		@@moredsp
+		
+		<div class='cls-guest-confirm-@@ps'>@@para2</div>
+	
+		<div id='guest-ticket-buttons'>
+			<button class='cls-ticket-button-back-@@ps' onclick='event.preventDefault();sendreqback();'>Back </button>
+			<button class='cls-ticket-button-submit2-@@ps' onclick='event.preventDefault();sendrequest2(@@ps);'>Submit Inquiry Now</button>
+		</div>
+		<div id='guest-ticket-working-@@ps' style='display:none;' >
+			<div class='cls-ticket-working2-@@ps'>Working, please wait...</div>
+		</div>
+	</div>
 		
 	</form>		
 	</body>
@@ -12485,6 +12647,8 @@ restapi.get('/guest-login',
 		var html = "Error Guest Login2"
 		if(req.guest_code_pid > 0) {
 
+			restapi.engine('html', swig.guest_login);
+
 			//as default, set HTML <style> element to css string to _guest_gen_css with propID in place of @@id
 			var css = replace_all_array(_guest_gen_css, {id: req.query.id})	
 			var csslink = "<style>" + css + "</style>"
@@ -12529,9 +12693,11 @@ restapi.get('/guest-login',
 			moredsp += guest_display(ps, "spg", "SPG #")
 			moredsp += guest_display(ps, "amount", "Refund Requested")
 
-			
-			//html = _guest_login_page.replace('@@js', _guest_login_js)
-			html = _guest_login_page.replace('@@inputs', inputs)
+			res.render('guest_login', { '@@inputs': inputs, '@@morebox': morebox, '@@displays': displays, '@@moredsp': moredsp, '@@para2': req.guest_custom_para2, '@@ps': req.query.id+'-0', '@@csslink': csslink })
+			return
+			/*
+			html = _guest_login_page.replace('@@js', _guest_login_js)
+			html = html.replace('@@inputs', inputs)
 			html = html.replace('@@morebox', morebox)
 			html = html.replace('@@displays', displays)
 			html = html.replace('@@moredsp', moredsp)
@@ -12539,7 +12705,7 @@ restapi.get('/guest-login',
 			html = replace_all_array(html, {
 				ps: req.query.id+'-0',
 				csslink: csslink
-			})
+			})*/
 		}
 		res.write(html)
 		res.end()
