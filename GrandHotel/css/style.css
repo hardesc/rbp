@@ -20,10 +20,10 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 }
 #guest-ticket-fields {
 	margin-top: 10px;
+	font-size: 16px;
+	color: #ddd;
 }
-#div-ticket-div-fname-855BB8F-0 {
-    
-}
+#div-ticket-div-fname-855BB8F-0 {}
 #div-ticket-div-lname-855BB8F-0 {}
 #div-ticket-div-room-855BB8F-0 {}
 #div-ticket-div-lastfour-855BB8F-0 {}
@@ -96,6 +96,15 @@ License URL: http://creativecommons.org/licenses/by/3.0/
     font-size: 13px;
 }
 .cls-display-label-room-855BB8F-0 {} 
+
+.cls-ticket-label-lastfour-855BB8F-0 {
+	position: relative;
+	top: 240px;
+	    color: #bdaa88;
+    font-weight: bold;
+    font-size: 13px;
+}
+
 .cls-ticket-label-checkin-855BB8F-0 {
 	position: relative;
 	top: 125px;
@@ -127,8 +136,8 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 }
 .cls-display-label-email-855BB8F-0 {}
 .cls-ticket-label-desc-855BB8F-0 {
-	position: relative;
-	top: 255px;
+	position: fixed;
+	top: 475px;
 	    color: #bdaa88;
     font-weight: bold;
     font-size: 13px;
@@ -163,11 +172,33 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 .cls-display-label-amount-855BB8F-0 {}
 
 
-.cls-ticket-select-itype-855BB8F-0, .cls-ticket-input-name-855BB8F-0, .cls-ticket-input-fname-855BB8F-0, .cls-ticket-input-mi-855BB8F-0 , .cls-ticket-input-lname-855BB8F-0 , .cls-ticket-input-lname-855BB8F-0, .cls-ticket-input-room-855BB8F-0, .cls-ticket-input-checkin-855BB8F-0, .cls-ticket-input-checkout-855BB8F-0, .cls-ticket-input-email-855BB8F-0, .cls-ticket-input-email2-855BB8F-0, .cls-ticket-input-phone-855BB8F-0, .cls-ticket-textarea-desc-855BB8F-0, .cls-ticket-input-cancellation-855BB8F-0 , .cls-ticket-input-spg-855BB8F-0, .cls-ticket-input-amount-855BB8F-0  {
+.cls-ticket-select-itype-855BB8F-0, 
+.cls-ticket-input-name-855BB8F-0, 
+.cls-ticket-input-fname-855BB8F-0, 
+.cls-ticket-input-mi-855BB8F-0 , 
+.cls-ticket-input-lname-855BB8F-0 , 
+.cls-ticket-input-lname-855BB8F-0, 
+.cls-ticket-input-room-855BB8F-0, 
+.cls-ticket-input-lastfour-855BB8F-0,
+.cls-ticket-input-checkin-855BB8F-0, 
+.cls-ticket-input-checkout-855BB8F-0, 
+.cls-ticket-input-email-855BB8F-0, 
+.cls-ticket-input-email2-855BB8F-0, 
+.cls-ticket-input-phone-855BB8F-0, 
+.cls-ticket-textarea-desc-855BB8F-0, 
+.cls-ticket-input-cancellation-855BB8F-0 , 
+.cls-ticket-input-spg-855BB8F-0, 
+.cls-ticket-input-amount-855BB8F-0  {
 	position:fixed;
 	margin-top: 85px;
     left: 149px;
-    top: 140px;
+    width:130px;
+	background: #463C31;
+	border: 1px solid rgb(119, 96, 72);
+	color:#ddd;
+	font-size:12px;
+	outline:none;
+	padding:5px;}
 }
 
 .cls-ticket-textarea-desc-855BB8F-0 {
@@ -182,6 +213,7 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 .cls-ticket-display-email-855BB8F-0,
 .cls-ticket-display-create-855BB8F-0,
 .cls-ticket-display-phone-855BB8F-0,
+.cls-ticket-display-lastfour-855BB8F-0,
 .cls-ticket-display-desc-855BB8F-0,
 .cls-ticket-display-cancellation-855BB8F-0, 
 .cls-ticket-display-spg-855BB8F-0, 
@@ -208,13 +240,16 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 .cls-ticket-input-fname-855BB8F-0.error ,
 .cls-ticket-input-lname-855BB8F-0.error,
 .cls-ticket-input-room-855BB8F-0.error,
+.cls-ticket-input-lastfour-855BB8F-0.error,
 .cls-ticket-input-checkin-855BB8F-0.error,
 .cls-ticket-input-checkout-855BB8F-0.error,
 .cls-ticket-input-email-855BB8F-0.error,
 .cls-ticket-input-email2-855BB8F-0.error,
 .cls-ticket-input-phone-855BB8F-0.error,
-.cls-ticket-textarea-desc-855BB8F-0.error
-	{border:1px solid red !important}
+.cls-ticket-textarea-desc-855BB8F-0.error,
+.cls-ticket-input-cancellation-855BB8F-0.error,
+.cls-ticket-input-spg-855BB8F-0.error,
+.cls-ticket-input-amount-855BB8F-0.error {border:1px solid red !important}
 
 .cls-ticket-select-itype-855BB8F-0 {
 	margin-left: 0px;
@@ -228,18 +263,12 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 .cls-ticket-input-fname-855BB8F-0		{
 	top: 45px;
 	
-	width:130px;
-	background: #463C31;
-	border: 1px solid rgb(119, 96, 72);
-	color:#ddd;
-	font-size:12px;
-	outline:none;
-	padding:5px;
+
 
 }
 .cls-ticket-display-name-855BB8F-0		{top: 51px;}
 
-.cls-ticket-input-mi-855BB8F-0 			{top: 84px;width: 50px !important;
+.cls-ticket-input-mi-855BB8F-0 			{top: 84px; width: 50px !important;
 }
 .cls-ticket-input-lname-855BB8F-0 		{
 	top: 83px;
@@ -263,6 +292,17 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 	padding:5px;
 }
 .cls-ticket-display-room-855BB8F-0		{top: 90px;}
+
+.cls-ticket-input-lastfour-855BB8F-0 {
+	top: 360px;
+	width:130px;
+	background: #463C31;
+	border: 1px solid rgb(119, 96, 72);
+	color:#ddd;
+	font-size:12px;
+	outline:none;
+	padding:5px;
+}
 
 .cls-ticket-input-checkin-855BB8F-0		{
 	top: 161px;
@@ -320,7 +360,9 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 	outline:none;
 	padding:5px;
 }
-.cls-ticket-display-phone-855BB8F-0		{top: 206px;}
+.cls-ticket-display-phone-855BB8F-0		{top: 210px;}
+
+.cls-ticket-display-lastfour-855BB8F-0		{top: 245px;}
 
 .cls-ticket-textarea-desc-855BB8F-0 		{left:0px; top: 425px; width: 519px; height: 98px;}
 .cls-display-textarea-desc-855BB8F-0 	{left:0px; top: 366px; width: 519px; height: 98px;}
@@ -335,19 +377,12 @@ License URL: http://creativecommons.org/licenses/by/3.0/
     font-size: 13px;
 }
 .cls-ticket-input-cancellation-855BB8F-0 	{
-	position:relative;
-	margin-top: 222px;
-		width:120px;
-	background: #463C31;
-	border: 1px solid rgb(119, 96, 72);
-	color:#ddd;
-	font-size:12px;
-	outline:none;
-	padding:5px;
+
+	top:530px;
 
 }
 .cls-ticket-display-cancellation-855BB8F-0 	{
-
+	top: 421px;
 }
 
 .cls-ticket-label-spg-855BB8F-0		 	{
@@ -357,40 +392,23 @@ License URL: http://creativecommons.org/licenses/by/3.0/
     font-size: 13px;
 
 }
-.cls-ticket-input-spg-855BB8F-0 			{
-			position:relative;
-	margin-top: 45px;
-		width:120px;
-	background: #463C31;
-	border: 1px solid rgb(119, 96, 72);
-	color:#ddd;
-	font-size:12px;
-	outline:none;
-	padding:5px;
-}
-.cls-ticket-display-spg-855BB8F-0 		{top: 421px}
+.cls-ticket-input-spg-855BB8F-0 {top:600px;}
+
+.cls-ticket-display-spg-855BB8F-0 		{top: 460px}
 
 .cls-ticket-label-amount-855BB8F-0	 	{
 	top: 599px;
-		    color: #bdaa88;
+	color: #bdaa88;
     font-weight: bold;
     font-size: 13px;
 
 }
-.cls-ticket-input-amount-855BB8F-0		{
-		position:relative;
-	margin-top: -62px;
-		width:120px;
-	background: #463C31;
-	border: 1px solid rgb(119, 96, 72);
-	color:#ddd;
-	font-size:12px;
-	outline:none;
-	padding:5px;}
-.cls-ticket-display-amount-855BB8F-0	{top: 460px;}
+.cls-ticket-input-amount-855BB8F-0		{top:565px}
+
+.cls-ticket-display-amount-855BB8F-0	{top: 500px;}
 
 .cls-ticket-button-submit-855BB8F-0		{position: fixed !important;top: 640px;left: 384px;}
-.cls-ticket-button-back-855BB8F-0		{position: fixed !important;top: 499px;left: 284px;}
+.cls-ticket-button-back-855BB8F-0		{position: fixed !important;top: 540px;left: 284px;}
 .cls-ticket-button-submit2-855BB8F-0	{position: fixed !important;top: 499px;left: 369px;}
 
 
@@ -424,6 +442,7 @@ body {
 	font-family:Verdana;
 	background:#352D24;
 }
+#body1, #iframe_body {height:500px;}
 .wrap{
 	margin:0 auto;
 	width:980px;
@@ -853,7 +872,7 @@ strong {
 	color:#fff;
 	margin-bottom:10px;
 }
-.cont-left-main span{
+.cont-left-main span, {
 	font-size: 13px;
 	color: #ddd;
 	font-weight: bold;

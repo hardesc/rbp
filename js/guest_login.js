@@ -2,6 +2,7 @@
 
 var submit_req = ""
 
+//reset the border color of an empty element to none
 function atku(e) {
 	if(e.value.length > 0) {
 		e.style.borderColor = ""
@@ -9,21 +10,21 @@ function atku(e) {
 }
 
 
-		
+//basic 
 function encode(s) {
 
 	if (s.length == 0 || s == null) {return ""}
 
-	var c='';
-	var o='';
+	var c = '';
+	var o = '';
 
 	for (var i = 0; i < s.length; i++) {
 		c = s.charCodeAt(i).toString(); 
 		if (c.length > 3) {			
-			if (c == 8211 || c == 8212) {c = '045'}
-			else if (c == 8216 || c == 8217) {c = '039'}
-			else if (c == 8218 || c==8222){c = '044'}
-			else if(c==8220 || c == 8221) {c = '034'}			
+			if (c == 8211 || c == 8212) {c = '045'}//change to ascii dash
+			else if (c == 8216 || c == 8217) {c = '039'}//change to ascii single apostrophe
+			else if (c == 8218 || c == 8222){c = '044'}//change to ascii comma
+			else if(c == 8220 || c == 8221) {c = '034'}//change to ascii double quotes
 			else {c = (' ').charCodeAt(0).toString()} 
 		}
 		while ( c.length < 3) {c = '0' + c;}		
@@ -33,6 +34,8 @@ function encode(s) {
 }
 
 function sendrequest(ps) {
+
+	console.log("made it into sendrequest")
 
 	//var ps = '@@ps';
 	var er = false;
@@ -165,7 +168,7 @@ function sendrequest(ps) {
 	eter = rm + ".er"
 
 	tkrm = document.getElementById(rm).value;
-	if (tkrm.length==0) {
+	if (tkrm.length == 0) {
 		er=true;
 		addClass(rm, "error");
 		addClass(eter, "show");
@@ -173,7 +176,7 @@ function sendrequest(ps) {
 	}
 	
 	if (tkem != tkrm) {
-		er=true;
+		er = true;
 		addClass(em, "error");
 		addClass(rm, "error");
 	}
@@ -325,6 +328,7 @@ function sendreqback() {
 }
 		
 function sendrequest2(ps) {
+	console.log("sendrequest2")
 	document.getElementById("guest-ticket-buttons").style.display = "none";
 	document.getElementById("guest-ticket-working-" + ps).style.display = "";
 	var a = _z(submit_req);
@@ -334,12 +338,18 @@ function sendrequest2(ps) {
 		if (a.readyState == 4) {
 			var ra = a.responseText.split('::::')
 
-			if(ra[0]=='success'){
+			if (ra[0] == 'success') {
 				document.getElementById("guest-ticket-fields").innerHTML = ra[1];
 				document.getElementById("guest-ticket-fields").style.display = "";
 				document.getElementById("guest-ticket-display").style.display = "none";
 				document.getElementById("guest-instructions").style.display = "none";
-				window.scrollTo(0,0);
+				//window.scrollTo(0,0);
+				console.log('about to scroll');
+				//window.parent.scrollTo(0,0);
+				window.parent.scroll(0, 0);
+				console.log('should have scrolled');
+				//setTimeout(function() {window.scrollTo(0, 0);},1);
+				//document.getElementById("body1").scrollTo()
 			}
 			else {
 				document.getElementById("guest-ticket-buttons").style.display = "";
@@ -350,6 +360,13 @@ function sendrequest2(ps) {
 		}
 	};
 	_h(a);
+}
+
+function requestType(req, ps) {
+	if (req == 1) {
+		document.getElementById('div-ticket-div-lastfour-' + ps).style.display = '';
+	}
+	else { document.getElementById('div-ticket-div-lastfour-' + ps).style.display = 'none'}
 }
 		
 function _z(f) {
@@ -366,7 +383,7 @@ function _z(f) {
 			}
 		}
 	} 
-	try { a.open('GET',f);}
+	try { a.open('GET', f);}
 	catch (e4) {
 		alert(e4);
 		alert(f);
@@ -376,7 +393,7 @@ function _z(f) {
 }
 
 function _h(a) {
-	a.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+	a.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 	a.send();
 }
 
@@ -385,12 +402,12 @@ function addClass(id,cls) {
 
 	if (e) {
 		var s = e.getAttribute('class'); 
-		e.setAttribute('class', s+ ' ' + cls);
-		e.setAttribute('className', s+ ' ' + cls);
+		e.setAttribute('class', s + ' ' + cls);
+		e.setAttribute('className', s + ' ' + cls);
 	}
 }
 
-function removeClass(id,cls) {
+function removeClass(id, cls) {
 	var e = document.getElementById(id);
 	var ea = e.getAttribute('class').split(' ');
 	var nc = [];
@@ -401,7 +418,7 @@ function removeClass(id,cls) {
 
 	if(e){ 
 		var nct = nc.join(' ');
-		e.setAttribute('class',nct);
-		e.setAttribute('className',nct);
+		e.setAttribute('class', nct);
+		e.setAttribute('className', nct);
 	}
 }
