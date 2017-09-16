@@ -5743,7 +5743,7 @@ function middleHandler_db_check_user_supplied_property(req, res, next) {
 	sql = sql.replace('@@prop', req.query.prop);
 	db.each(sql, function(err, row) {		
 		req.propid = row.propertyID
-		//req.prop_linksite = "http://" + env.guest_server + "/" + row.linksite + "/"
+		//req.prop_linksite = env.guest_server + "/" + row.linksite + "/"
 		req.prop_linksite = row.linksite
 	}, function () {	
 		next();
@@ -5994,7 +5994,7 @@ function middleHandler_email_prep_new_associate(req, res, next) {
 	var body = "<br>Email: @@email<br><br>To complete your registration, you must create a password by clicking on the following link:<br><br><a rel='nofollow' target='_blank' href='@@sport/associate/create?id=@@xcode'>@@sport/associate/create?id=@@xcode</a><br>"
 	body = replace_all_array(body, {
 		email: req.sendmail_to,
-		sport: env.server,
+		sport: env.guest_server,
 		xcode: req.add_user_xcode 
 	})
 	req.sendmail_text = "An account has been created for you on RBP Software Solutions<br>"+body
@@ -6390,7 +6390,7 @@ function middleHandler_ticket_edit_system_email_ticket_assignment(req, res, next
 		var subject = "Ticket Assignment for @@pname - @@ticketno"
 			req.sendmail_subject = replace_all_array(subject, req.tickets[0]);
 		var body = replace_all_array(system_email_ticket_assignment, req.tickets[0]);
-			body = replace_all_array(body, {sport: env.server, status: _ticket_status_labels[req.ticket_update_status]})
+			body = replace_all_array(body, {sport: env.guest_server, status: _ticket_status_labels[req.ticket_update_status]})
 			body = body.replace('@@ticket_history', req.ticket_history);
 		req.sendmail_text = body
 		req.sendmail_html = body
@@ -6464,7 +6464,7 @@ function middleHandler_ticket_edit_system_email_system_defaults(req, res, next) 
 		var subject = "Guest Inquiry Awaiting Approval for @@pname - @@ticketno"
 			req.sendmail_subject = replace_all_array(subject, req.tickets[0]);
 		var body = replace_all_array(system_email_waiting_body, req.tickets[0]);
-			body = replace_all_array(body, {sport: env.server, status: _ticket_status_labels[req.ticket_update_status]})
+			body = replace_all_array(body, {sport: env.guest_server, status: _ticket_status_labels[req.ticket_update_status]})
 			body = body.replace('@@ticket_history', req.ticket_history);
 		req.sendmail_text = body
 		req.sendmail_html = body
@@ -6474,7 +6474,7 @@ function middleHandler_ticket_edit_system_email_system_defaults(req, res, next) 
 		var subject = "Guest Inquiries Notification for @@pname - @@ticketno"
 			req.sendmail_subject = replace_all_array(subject, req.tickets[0]);
 		var body = replace_all_array(system_email_attention_body, req.tickets[0]);
-			body = replace_all_array(body, {sport: env.server, status: _ticket_status_labels[req.ticket_update_status]})
+			body = replace_all_array(body, {sport: env.guest_server, status: _ticket_status_labels[req.ticket_update_status]})
 			body = body.replace('@@ticket_history', req.ticket_history);
 		req.sendmail_text = body
 		req.sendmail_html = body
@@ -6524,7 +6524,7 @@ function middleHandler_db_ticket_edit_file_elinks(req, res, next) {
 				original_name: row.original_name,
 				dateadded: row.dateadded,
 				ft: row.original_name.split(".")[1],
-				server: env.server
+				server: env.guest_server
 			})
 			next();
 		});
@@ -6589,7 +6589,7 @@ function middleHandler_email_prep_ticket_edit_guest_message(req, res, next) {
 				fname: req.ticket_old_row[0]['fname'],
 				mi: req.ticket_old_row[0]['mi'],
 				lname: req.ticket_old_row[0]['lname'],				
-				server: env.server,
+				server: env.guest_server,
 				filelinks_text: files_text,
 				filelinks_html: files_html
 			}
@@ -6941,7 +6941,7 @@ restapi.get('/tickets',
 			bit = bit.replace('@@bottombuttons', bottombuttons);
 			var linksite_button = _linksite_button.replace('@@linksite', req.prop_linksite)
 			//todo before production
-			linksite_button = linksite_button.replace('http://guest.rbpsoftwaresolutions.com', env.server)
+			linksite_button = linksite_button.replace('http://guest.rbpsoftwaresolutions.com', env.guest_server)
 			bit = bit.replace('@@linkpropbutton', linksite_button)
 			bit = replace_all(bit, '@@status', req.query.status)	
 		}
@@ -9502,8 +9502,8 @@ function middleHandler_email_prep_reset_password(req, res, next) {
 		}, function () {
 			req.sendmail_from = env.sendmail_from_noreply
 			req.sendmail_subject = 'RBP Software Solutions - Password Reset'
-			req.sendmail_text = '\nTo reset your password on RBP Software Solutions, click on the following link or copy and past the link into your web browser.\n\n'+env.server+'/associate/pwres?xcode='+g+'\n\nSupport: 415-794-5262'
-			req.sendmail_html = 'To reset your password on RBP Software Solutions, click on the following link or copy and past the link into your web browser.</p><br><a rel=\"nofollow\" target=\"_blank\" href=\"'+env.server+'/associate/pwres?xcode='+g+'\">'+env.server+'/associate/pwres?xcode='+g+'</a><br><br>Support: 415-794-5262'
+			req.sendmail_text = '\nTo reset your password on RBP Software Solutions, click on the following link or copy and past the link into your web browser.\n\n'+env.guest_server+'/associate/pwres?xcode='+g+'\n\nSupport: 415-794-5262'
+			req.sendmail_html = 'To reset your password on RBP Software Solutions, click on the following link or copy and past the link into your web browser.</p><br><a rel=\"nofollow\" target=\"_blank\" href=\"'+env.guest_server+'/associate/pwres?xcode='+g+'\">'+env.guest_server+'/associate/pwres?xcode='+g+'</a><br><br>Support: 415-794-5262'
 			req.sendmail_okresponse = 'Password reset email sent'
 			next();
 		});		
@@ -11480,7 +11480,7 @@ function middleHandler_ticket_get_files(req, res, next) {
 			if(row.userid == 0){username = "Guest"}else{username = row.username}
 			var val = {id: row.fid, userid: row.userid, tid: row.ticketid, content: row.content, 
 			file: row.content,
-			server: env.server,
+			server: env.guest_server,
 			ext: row.content.split('.')[1],
 			original_name: row.original_name, dateadd: row.dateadd, username: username}
 			req.ticket_files.push(val);
@@ -12515,7 +12515,7 @@ function middleHandler_guest_request_message(req, res, next) {
 		req.sendmail_to = req.query.em.toLowerCase();
 		req.sendmail_subject = req.em_subject;
 		var body = req.em_body		
-		var params = {sport: env.server, id: req.tickets[0]['id'], gcode: req.guest_ticket_gcode, fname: req.tickets[0]['fname'], lname: req.tickets[0]['lname'], tdate: req.tickets[0]['tdate'], email: req.tickets[0]['email'], description: req.tickets[0]['description']}
+		var params = {sport: env.guest_server, id: req.tickets[0]['id'], gcode: req.guest_ticket_gcode, fname: req.tickets[0]['fname'], lname: req.tickets[0]['lname'], tdate: req.tickets[0]['tdate'], email: req.tickets[0]['email'], description: req.tickets[0]['description']}
 		req.sendmail_text = body + replace_all_array(_em_link_text, params)
 		req.sendmail_html = body + replace_all_array(_em_link_html, params)
 		req.sendmail_okresponse = 'Message sent.'
@@ -12774,7 +12774,7 @@ restapi.get('/guest/ticket/comment',
 		var html = _guest_ticket_page.replace('<<bigheader>>', _bigheader);
 		html = replace_all_array(html, {id: req.query.id, gcode: req.query.gcode})
 		var form =  replace_all_array(_guest_ticket_form, req.guest_ticket[0])		
-		form = replace_all_array(form, {id: req.query.id, upload_token: req.query.gcode, xport: env.server})
+		form = replace_all_array(form, {id: req.query.id, upload_token: req.query.gcode, xport: env.guest_server})
 		html = html.replace('@@content', form)
 		html = html.replace('@@history', history)
 	}
@@ -13476,7 +13476,7 @@ const _grand_hotel_inquiry = (function () {/*
 			</div>
 			<h3>Guest Inquiry form:</h3>
 		<div class="main">
-			<iframe style='width:700px;height:750px' src="http://@@sport/guest-login?id=855BB8F" frameborder="0" allowfullscreen></iframe>
+			<iframe style='width:700px;height:750px' src="@@sport/guest-login?id=855BB8F" frameborder="0" allowfullscreen></iframe>
 		
 		</div>
 		   <div class="clear"></div>
