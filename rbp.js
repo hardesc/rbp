@@ -20,18 +20,16 @@ var _adminemail = env.admin_email
 var crypto = require('crypto');
 var zlib = require('zlib');
 var express = require('express');
-var swig = require('swig');
 var multer  = require('multer');
 var get = require('get-parameter-names')
 var request = require('request');
-var path = require('path');
 	
 function phone(v) {
     var numbers = v.replace(/\D/g, ''),
         char = {0:'(',3:') ',6:' - '};
     v = '';
     for (var i = 0; i < numbers.length; i++) {
-        v += (char[i] || '') + numbers[i];
+        v += (char[i]||'') + numbers[i];
     }
 	return v;
 }
@@ -60,8 +58,8 @@ var transporter = nodemailer.createTransport(smtpTransport({
 // send mail
 /*
 transporter.sendMail({
-    from: 'charleshardes@gmail.com',
-    to: 'charleshardes@gmail.com',
+    from: 'dwaynedomi@gmail.com',
+    to: 'dwaynedomi@gmail.com',
     subject: 'rbp started',
     text: 'rbp was started from xxx'
 }, function(error, response) {
@@ -82,16 +80,9 @@ db.serialize(function() {
 	db.run("create table if not exists blog (autoID INTEGER PRIMARY KEY, userid INTEGER, ukey TEXT, title TEXT, date TEXT, imagefile TEXT, intropara TEXT, fulltext TEXT, visible INTEGER)"); //use alter
 });
 
+var express = require('express');
 var restapi = express();
-restapi.use(express.static(path.join(__dirname, '/public')));
-
-//setting 'views' path to html folder
-restapi.set('views', path.join(__dirname, '/html'));
-
-//from http://mherman.org/blog/2015/08/24/node-express-swig-mongo-primer/#.WbLbCIjyuUk
-var swig = new swig.Swig();
-restapi.engine('html', swig.renderFile);
-restapi.set('view engine', 'html');
+restapi.use(express.static('public'));
 
 if (env.env == 'development') {
     console.log('runnign development')
@@ -117,16 +108,15 @@ var storage = multer.diskStorage({
   filename: function (req, file, cb) {
 	var fn = crypto.pseudoRandomBytes(16);
 	var ft = "unknown"
-	if (file.mimetype == "application/pdf") {ft = "pdf"}
-	if (file.mimetype == "application/msword") {ft = "doc"}
-	if (file.mimetype == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {ft = "docx"}
-	if (file.mimetype == "application/vnd.ms-excel") {ft = "xls"}
-	if (file.mimetype == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {ft = "xlsx"}
-	if (file.mimetype == "application/rtf") {ft = "rtf"}
+	if(file.mimetype=="application/pdf"){ft = "pdf"}
+	if(file.mimetype=="application/msword"){ft = "doc"}
+	if(file.mimetype=="application/vnd.openxmlformats-officedocument.wordprocessingml.document"){ft = "docx"}
+	if(file.mimetype=="application/vnd.ms-excel"){ft = "xls"}
+	if(file.mimetype=="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"){ft = "xlsx"}
+	if(file.mimetype=="application/rtf"){ft = "rtf"}
 	cb(null, fn.toString('hex') + Date.now() + '.' + ft);
   }
 });
-
 var upload = multer({ storage: storage });
 
 var storage2 = multer.diskStorage({
@@ -136,18 +126,17 @@ var storage2 = multer.diskStorage({
   filename: function (req, file, cb) {
 	var fn = file.originalname
 	var ft = "unknown"
-	if(file.mimetype == "image/jpeg") {ft = "jpg"}
-	if(file.mimetype == "image/png") {ft = "png"}	
+	if(file.mimetype=="image/jpeg"){ft = "jpg"}
+	if(file.mimetype=="image/png"){ft = "png"}	
 	console.log(file)
-	cb(null, fn);
+	cb(null, fn );
   }
 });
-
 var upload2 = multer({ storage: storage2 });
 
 function find_id(array, id) {
-	for (var x = 0; x < array.length; x++) {
-		if (array[x]['id'] == id) {
+	for(var x=0;x<array.length;x++){
+		if(array[x]['id']==id){
 			return x
 		}
 	}
@@ -158,11 +147,10 @@ function replace_all(html, i, val) {
 	var re = new RegExp(i, 'g');
 	return html.replace( re, val);		
 }
-
-//takes an html string with @@placeholders, replace the @@placeholders with array values, returns new html string
+	
 function replace_all_array(html, array) {
-	for(var i in array) {
-		var re = new RegExp("@@" + i, 'g');
+	for(var i in array){
+		var re = new RegExp("@@"+i, 'g');
 		html = html.replace( re, array[i]);		
 	}	
 	return html	
@@ -171,39 +159,38 @@ function replace_all_array(html, array) {
 //Simple obfuscation of clear text sent by forms
 function decode(txt) {
 	 var res = ""
-		for (var x = 0; x < txt.length; x += 3) {
-			var dat = txt.substr(x, 3);
-			if (dat === "039") {
-				res += "&#39;";//ok to keep
+		for(var x=0;x<txt.length;x+=3){
+			var dat = txt.substr(x,3);
+			if(dat==="039") {
+				res+= "&#39;"  ;//ok to keep
 			} else if (dat === "010") {
-				res += "<br><br>";//ok to convert/keep
+				res+= "<br><br>" ;//ok to convert/keep
 			} else {
-				res += String.fromCharCode(parseInt(dat));
+				res+= String.fromCharCode(parseInt(dat));
 			}
 		}
 	return res
 }
 	
-function todollar(n) {
-	if (n == 0) {return 0}
-	if (n > 100) {return (n / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");}
+function todollar(n){
+	if(n==0){return 0}
+	if(n>100){return (n/100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");}
 	return n
 }	
 
 function from_currency (a) {
 	var number = 0
-	if (a.toString().length == 0) {return 0} 
-	else {
+	if (a.toString().length == 0) {return 0} else {
 		number = Number(a.replace(/[^0-9\.]+/g,""));
-		if (number > 0) {number = number * 100}
+		if(number>0){number = number*100}
 	}
 	return number
 }
 
 
-function average(v, c) {
-	if ( c == 0) {return 0}
-	return todollar(v / c)
+function average(v,c){
+	if(c==0){return 0}
+	return todollar(v/c)
 }
 
 function fixemail(text) {
@@ -212,11 +199,11 @@ function fixemail(text) {
 
 function emailprep(a) {	
 	var codes = ["&#61;","=","&#64;","@","&#60;","<","&#62;",">","&#39;","'","&#96;","'"]
-	for(var x = 0; x < codes.length; x = x + 2) {
-		a = replace_all(a, codes[x], codes[x + 1])
+	for(var x=0;x<codes.length;x=x+2){
+		a = replace_all(a, codes[x], codes[x+1])
 	}
 	a = replace_all(a, "&#39;","'"); //must be separate
-	return "<html><body><p>" + a + "</body></html>"
+	return "<html><body><p>"+a+"</body></html>"
 }
 
 function clean(a) {
@@ -230,8 +217,8 @@ function clean(a) {
 	"&#123;","{",
 	"&#125;","}"
 	]
-	for (var x = 0; x < codes.length; x = x + 2) {
-		a = replace_all(a, codes[x], codes[x + 1])
+	for(var x=0;x<codes.length;x=x+2){
+		a = replace_all(a, codes[x], codes[x+1])
 	}
 	a = replace_all(a, "&#39;","'"); //must be separate
 	a = replace_all(a, "&#96;","'"); //must be separate
@@ -280,11 +267,11 @@ function validateEmail(email) {
 
 function comment_bubble(a){
 	var bubble = ""
-	if(a) {
+	if(a){
 			var bs = a.split(',')
-			if (bs.length > 0){
+			if(bs.length > 0){
 				var bsv = bs[bs.length-1]
-				if (bsv == 8 || bsv == 10) {
+				if(bsv==8 || bsv==10){
 					bubble = _bubble
 				}
 			}
@@ -293,23 +280,23 @@ function comment_bubble(a){
 }	
 
 function pad(num, size) {
-    var s = num + "";
+    var s = num+"";
     while (s.length < size) s = "0" + s;
     return s;
 }
 
 //also in browser js
 function credit_card_mask (s) {
-	s = s.replace(/(\d) (\d)/g, "");
-	s = s.replace(/(\d)-(\d)/g, "");
-	s = s.replace(/\d(?=\d{4})/g, "*");
+	s=s.replace(/(\d) (\d)/g, "");
+	s=s.replace(/(\d)-(\d)/g, "");
+	s=s.replace(/\d(?=\d{4})/g, "*");
 	return s
 }
 
 function clk(d) {	
-    dformat = [d.getMonth() + 1,
+    dformat = [d.getMonth()+1,
                d.getDate(),
-               d.getFullYear()].join('/') + ' ' +
+               d.getFullYear()].join('/')+' '+
               [d.getHours(),
                d.getMinutes(),
                d.getSeconds()].join(':');
@@ -317,20 +304,17 @@ function clk(d) {
 }	
 
 function dlk(d) {	
-    dformat = [d.getMonth() + 1,
+    dformat = [d.getMonth()+1,
                d.getDate(),
                d.getFullYear()].join('/');
 	return dformat;
 }	
 
 //note, any reg expr with $ must use &#36; instead
-function add_input(req, idx, ps, did, label, type, pattern) {
-	var atku = ""; 
-	if (req == 1) {atku = "onkeyup='atku(this);'"}
-	if (pattern == "") {}
-	else {pattern = "pattern='" + pattern + "' "}
-	if (type == "phone") {var blur = "onblur='formatPhone(this);'"} 
-	else {var blur = ""}
+function add_input(req, idx, ps, did, label, type, pattern){
+	var atku = ""; if(req==1){atku = "onkeyup='atku(this);'"}
+	if(pattern == ""){}else{pattern = "pattern='"+pattern+"' "}
+	if(type == "phone"){var blur = "onblur='formatPhone(this);'"} else {var blur = ""}
 	return replace_all_array(_ticket_input_row, {
 		did: did,
 		ps: ps,
@@ -352,14 +336,9 @@ function add_checkbox(req, idx, ps, did, nid, label){
 }
 
 function guest_input(req, tab, pid, did, label, type, pattern, placeholder, style){
-
-	var atku = "";
-	var blur = "";
-
-	if (req == 1) { atku = "onkeyup='atku(this);'" }
-	if (pattern != "") { pattern = "pattern='" + pattern + "'" }	
-	if (type == "phone") {blur = "onblur='formatPhone(this);'"}
-
+	var atku = ""; if(req==1){atku = "onkeyup='atku(this);'"}
+	if(pattern == ""){}else{pattern = "pattern='"+pattern+"'"}	
+	if(type == "phone"){var blur = "onblur='formatPhone(this);'"} else {var blur = ""}
 	return replace_all_array(_guest_input_row, {
 		did: did,
 		pid: pid,
@@ -384,7 +363,7 @@ function rbp_dte() {
 	hours = hours % 12,
 	hours = hours ? hours : 12,
 	ampm = d.getHours() >= 12 ? 'PM' : 'AM',
-    dformat = [pad(d.getMonth() + 1, 2), pad(d.getDate(), 2), d.getFullYear()].join('/') + ' ' + [pad(hours, 2), pad(d.getMinutes(), 2)].join(':') + ' ' + ampm;
+    dformat = [pad(d.getMonth()+1,2), pad(d.getDate(),2), d.getFullYear()].join('/')+' '+ [pad(hours,2), pad(d.getMinutes(),2)].join(':') + ' ' + ampm;
 	return dformat;
 }
 	
@@ -4416,7 +4395,7 @@ body {
 			overflow: hidden;	
 		}
 		#guest-ticket-fields {
-			margin-top: 50px;
+
 		}
 		#Content {
 			background: #fff;
@@ -4949,6 +4928,278 @@ const _guest_gen_page = (function () {/*
 	</html>
 	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
 
+const _guest_login_js = (function () {/*  	
+	function atku(e){
+			if(e.value.length>0){e.style.borderColor=""}
+		}
+
+		var submit_req = ""
+		
+		function encode(s){
+			if(s.length == 0 || s == null){return ""}
+			var c='';
+			var o='';
+			for(var i=0;i<s.length;i++){
+				c = s.charCodeAt(i).toString(); 
+				if(c.length>3){			
+					if(c==8211 || c==8212){c = '045'}
+					else if(c==8216 || c==8217){c = '039'}
+					else if(c==8218 || c==8222){c = '044'}
+					else if(c==8220 || c==8221){c = '034'}			
+					else {c = (' ').charCodeAt(0).toString()} 
+				}
+				while ( c.length < 3) {c = '0' + c;}		
+				o += c;
+			};
+			return o;
+		}
+
+			function sendrequest(){
+				var ps = '@@ps';
+				var er = false;
+				var ex = ""
+				var et = "ticket.tk.itype."+ps
+				var tkit=parseInt(document.getElementById(et).value);
+				if(tkit==0){er=true;addClass(et,"error")}else{removeClass(et,"error")}
+				
+				var et = "ticket.tk.fname."+ps; var eter = et+".er"			
+				var tkfn=document.getElementById(et).value;
+				if(tkfn.length==0){er=true;addClass(et,"error");addClass(eter,"show");}else{removeClass(et,"error");removeClass(eter,"show");}
+				
+				var tkmi='';
+				
+				var et = "ticket.tk.lname."+ps; var eter = et+".er"
+				var tkln=document.getElementById(et).value;
+				if(tkln.length==0){er=true;addClass(et,"error");addClass(eter,"show");}else{removeClass(et,"error");removeClass(eter,"show");}
+				
+				var et = "ticket.tk.room."+ps; 	
+				var tkrn=document.getElementById(et).value;
+				
+				var et = "ticket.tk.checkin."+ps; var eter = et+".er"
+				var tkci=document.getElementById(et).value;	
+				if(tkci!=""){
+					var d = new Date(tkci);	
+					if(d.toString()==='Invalid Date' || d.getFullYear() < 2015 || isNaN(d.getFullYear())){
+						er=true;addClass(et,"error");addClass(eter,"show");
+						ex = ex + " Dates should be entered as mm/dd/yyyy."
+					}else{
+						removeClass(et,"error");removeClass(eter,"show");
+					}
+				}
+				
+							
+				var et = "ticket.tk.checkout."+ps; var eter = et+".er"			
+				var tkco=document.getElementById(et).value;
+				if(tkco!=""){
+					var d = new Date(tkco);	
+					if(d.toString()==='Invalid Date' || d.getFullYear() < 2015 || isNaN(d.getFullYear())){
+						er=true;addClass(et,"error");addClass(eter,"show");
+						ex = ex + " Dates should be entered as mm/dd/yyyy."
+					}else{
+						removeClass(et,"error");removeClass(eter,"show");
+					}
+				}
+				
+				var em = "ticket.tk.email."+ps; var eter = em+".er"
+				var tkem=document.getElementById(em).value;
+				if(tkem.length==0){er=true;addClass(em,"error");addClass(eter,"show");}else{removeClass(em,"error");removeClass(eter,"show");}
+				if(tkem.toLowerCase()=="na@na.com" || tkem.toLowerCase()=="no@notgiven.com"){er=true;addClass(em,"error");addClass(eter,"show");}else{removeClass(em,"error");removeClass(eter,"show");}
+				
+				var rm = "ticket.tk.email2."+ps; var eter = rm+".er"
+				var tkrm=document.getElementById(rm).value;
+				if(tkrm.length==0){er=true;
+					addClass(rm,"error");addClass(eter,"show");
+					ex = ex + " Please use a real email address name."
+				}
+				
+				if(tkem!=tkrm){er=true;
+					addClass(em,"error");
+					addClass(rm,"error");
+				}
+				
+				var et = "ticket.tk.phone."+ps; var eter = et+".er"
+				var tkph=document.getElementById(et).value;
+				if(tkph.length==0){er=true;addClass(et,"error");addClass(eter,"show");}else{removeClass(et,"error");removeClass(eter,"show");}
+				
+				var et = "ticket.tk.desc."+ps; var eter = et+".er"
+				var tkds=document.getElementById(et).value
+				tkds=tkds.replace(/(\d) (\d)/g, "");
+				tkds=tkds.replace(/(\d)-(\d)/g, "");
+				tkds=tkds.replace(/\d(?=\d{4})/g, "*");
+				if(tkds.length==0){er=true;addClass(et,"error");addClass(eter,"show");}else{removeClass(et,"error");removeClass(eter,"show");}
+				
+				
+				//var et = "ticket.tk.create."+ps
+				var tkcr="false";
+				
+				var et = "ticket.tk.cancellation."+ps
+				var tkca=document.getElementById(et).value;
+				
+				var et = "ticket.tk.spg."+ps
+				var tksp=document.getElementById(et).value;
+				
+				var et = "ticket.tk.amount."+ps
+				var tkam=document.getElementById(et).value;
+				
+				var cc = document.getElementById("ticket.tk.itype."+ps).value;
+				var et = "ticket.tk.lastfour."+ps; var eter = et+".er"
+				var tkcc=document.getElementById(et).value;
+				if(cc==1){
+					if(tkcc.length != 4){er=true;addClass(et,"error");addClass(eter,"show");}else{removeClass(et,"error");removeClass(eter,"show");}						
+				}
+				
+				if(er==true){alert("Some of the form fields were not filled out completely.  The items outlined in red are required."+ex+" Please try again.");return;}
+				submit_req = '/guest-request?ty='+tkit+'&ps='+ps+'&it='+tkit+'&fn='+encode(tkfn)+'&mi='+encode(tkmi)+'&ln='+encode(tkln)+'&rn='+encode(tkrn)+'&ci='+tkci+'&co='+tkco+'&em='+tkem+'&rm='+tkrm+'&cr='+tkcr+'&ph='+tkph+'&ds='+tkds+'&ca='+encode(tkca)+'&sp='+encode(tksp)+'&am='+tkam+'&cc='+encode(tkcc);
+				
+				document.getElementById("display.tk.itype."+ps).innerHTML = document.getElementById("ticket.tk.itype."+ps)[document.getElementById("ticket.tk.itype."+ps).value].text;
+				document.getElementById("display.tk.name."+ps).innerHTML = document.getElementById("ticket.tk.fname."+ps).value + " " + document.getElementById("ticket.tk.lname."+ps).value;
+				if(document.getElementById("ticket.tk.room."+ps).value==''){
+					document.getElementById("display.tk.room."+ps).innerHTML = "Not Provided"
+				}else{
+					document.getElementById("display.tk.room."+ps).innerHTML = document.getElementById("ticket.tk.room."+ps).value;
+				}
+				
+				if(document.getElementById("ticket.tk.lastfour."+ps).value==''){
+					document.getElementById("display.tk.lastfour."+ps).innerHTML = "N/A"
+				}else{
+					document.getElementById("display.tk.lastfour."+ps).innerHTML = document.getElementById("ticket.tk.lastfour."+ps).value;
+				}
+				
+				if(document.getElementById("ticket.tk.checkin."+ps).value=='' && document.getElementById("ticket.tk.checkout."+ps).value==''){
+					document.getElementById("display.tk.dates."+ps).innerHTML = "Not Provided"
+				}else{
+					document.getElementById("display.tk.dates."+ps).innerHTML = document.getElementById("ticket.tk.checkin."+ps).value + " to " + document.getElementById("ticket.tk.checkout."+ps).value;
+				}
+				document.getElementById("display.tk.email."+ps).innerHTML = document.getElementById("ticket.tk.email."+ps).value;
+				
+				//if(document.getElementById("ticket.tk.create."+ps).checked){
+				//	document.getElementById("display.tk.create."+ps).innerHTML = "Yes, an account will be created"
+				//}else{
+				//	document.getElementById("display.tk.create."+ps).innerHTML = "No, an account will not be created"
+				//}
+				
+				document.getElementById("display.tk.phone."+ps).innerHTML = document.getElementById("ticket.tk.phone."+ps).value;
+				document.getElementById("display.tk.desc."+ps).innerHTML = tkds
+				document.getElementById("display.tk.cancellation."+ps).innerHTML = document.getElementById("ticket.tk.cancellation."+ps).value;
+				document.getElementById("display.tk.spg."+ps).innerHTML = document.getElementById("ticket.tk.spg."+ps).value;
+				document.getElementById("display.tk.amount."+ps).innerHTML = document.getElementById("ticket.tk.amount."+ps).value;
+				
+				document.getElementById("guest-ticket-fields").style.display = "none";
+				document.getElementById("guest-ticket-display").style.display = "";
+				document.getElementById("guest-instructions").style.display = "none";
+			}
+			
+		
+		function sendreqback(){
+			document.getElementById("guest-ticket-fields").style.display = "";
+			document.getElementById("guest-ticket-display").style.display = "none";
+			document.getElementById("guest-instructions").style.display = "";
+		}
+		
+		function sendrequest2(){
+			document.getElementById("guest-ticket-buttons").style.display = "none";
+			document.getElementById("guest-ticket-working-@@ps").style.display = "";
+			var a=_z(submit_req);a.onreadystatechange=function(){if(a.readyState==4){
+			var ra = a.responseText.split('::::')
+			if(ra[0]=='success'){
+				document.getElementById("guest-ticket-fields").innerHTML = ra[1];
+				document.getElementById("guest-ticket-fields").style.display = "";
+				document.getElementById("guest-ticket-display").style.display = "none";
+				document.getElementById("guest-instructions").style.display = "none";
+				window.scrollTo(0,0);
+			} else {
+				document.getElementById("guest-ticket-buttons").style.display = "";
+				document.getElementById("guest-ticket-working-@@ps").style.display = "none";
+				document.getElementById("guest-instructions").style.display = "";				
+				alert(ra[1])
+			}
+		}};_h(a);}
+		
+		function _z(f){var a;f += '&rnd=' + Math.floor(Math.random()*99999);try{ a=new XMLHttpRequest();} catch (e1){try{ a=new ActiveXObject('Msxml2.XMLHTTP');} catch (e2) {try{ a=new ActiveXObject('Microsoft.XMLHTTP');} catch (e3){alert('ERR!');return false;} } } try{ a.open('GET',f);}catch (e4) {alert(e4);alert(f);return false;};return a;}
+		function _h(a){a.setRequestHeader('Content-type','application/x-www-form-urlencoded');a.send();}
+		function addClass(id,cls){
+			var e=document.getElementById(id);
+			if(e){var s=e.getAttribute('class'); 
+				e.setAttribute('class',s+' '+cls);
+				e.setAttribute('className',s+' '+cls);
+			}
+		}
+		function removeClass(id,cls){
+			var e=document.getElementById(id);
+			var ea = e.getAttribute('class').split(' ');
+			var nc = [];
+			for(var x=0;x<ea.length;x++){
+				if(ea[x]!=cls){nc.push(ea[x])}
+			}
+			if(e){ 
+				var nct = nc.join(' ');
+				e.setAttribute('class',nct);
+				e.setAttribute('className',nct);
+			}
+		}
+	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+
+const _guest_login_page = (function () {/*  	
+<html><head><title></title>
+	<script>
+	@@js
+	</script>
+	@@csslink
+	</head><body>
+	<div id="guest-instructions" class="instructions">
+						<p>If you have an issue with your hotel stay, please submit a guest inquiry ticket by completing the form below.</p>						
+					</div>
+					
+	<form id='guest-ticket' action='javascript:void(0);'>
+		<div id='guest-ticket-fields'>			
+			<label class="cls-ticket-label-itype-@@ps" for="ticket.tk.itype.@@ps">Request Type</label>
+			<div><select class="cls-ticket-select-itype-@@ps" id="ticket.tk.itype.@@ps" taborder="1" onChange="
+				if(this.value==1){
+					document.getElementById('div-ticket-div-lastfour-@@ps').style.display = '';
+				} else {
+					document.getElementById('div-ticket-div-lastfour-@@ps').style.display = 'none'
+				}
+			">
+				<option value='0'>Select</option>
+				<option value='1'>Bill Copy</option>
+				<option value='2'>Billing Issue</option>
+			</select></div>
+			
+			@@inputs	
+			<label class="cls-ticket-label-desc-@@ps" for="ticket.tk.desc.@@ps">Please write a message for the Hotel Staff</label>
+			<div>
+				<textarea class="cls-ticket-textarea-desc-@@ps" id='ticket.tk.desc.@@ps' name='ticket.tk.desc.@@ps' spellcheck='true' placeholder='Describe your inquiry here' taborder='13'></textarea>
+				<label class="cls-ticket-error-desc-@@ps" id="ticket.tk.desc.@@ps.er"></label>
+			</div>
+			@@morebox
+						
+			<button class='cls-ticket-button-submit-@@ps' onclick='event.preventDefault();sendrequest();' taborder='14'>Submit </button>
+		</div>
+		<div id='guest-ticket-display' style='display:none;'>
+			@@displays
+			<label class="cls-display-label-desc-@@ps">Message for the Hotel Staff</label>
+			<div>
+				<textarea class="cls-display-textarea-desc-@@ps" id='display.tk.desc.@@ps'></textarea>
+			</div>
+			@@moredsp
+			
+			<div class='cls-guest-confirm-@@ps'>@@para2</div>
+		
+			<div id='guest-ticket-buttons'>
+				<button class='cls-ticket-button-back-@@ps' onclick='event.preventDefault();sendreqback();'>Back </button>
+				<button class='cls-ticket-button-submit2-@@ps' onclick='event.preventDefault();sendrequest2();'>Submit Inquiry Now</button>
+			</div>
+			<div id='guest-ticket-working-@@ps' style='display:none;' >
+				<div class='cls-ticket-working2-@@ps'>Working, please wait...</div>
+			</div>
+		</div>
+		
+	</form>		
+	</body>
+	</html>
+	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+
+	
 const _user_prop_table = (function () {/*  	
 	<div><label class='desc' for='assoc.ae.prop'>Properties for this User</label><div id='assoc.ae.prop.div' class=''><table class='notiftable'>
 	@@rows
@@ -5743,7 +5994,6 @@ function middleHandler_db_check_user_supplied_property(req, res, next) {
 	sql = sql.replace('@@prop', req.query.prop);
 	db.each(sql, function(err, row) {		
 		req.propid = row.propertyID
-		//req.prop_linksite = env.guest_server + "/" + row.linksite + "/"
 		req.prop_linksite = row.linksite
 	}, function () {	
 		next();
@@ -5994,7 +6244,7 @@ function middleHandler_email_prep_new_associate(req, res, next) {
 	var body = "<br>Email: @@email<br><br>To complete your registration, you must create a password by clicking on the following link:<br><br><a rel='nofollow' target='_blank' href='@@sport/associate/create?id=@@xcode'>@@sport/associate/create?id=@@xcode</a><br>"
 	body = replace_all_array(body, {
 		email: req.sendmail_to,
-		sport: env.guest_server,
+		sport: env.server,
 		xcode: req.add_user_xcode 
 	})
 	req.sendmail_text = "An account has been created for you on RBP Software Solutions<br>"+body
@@ -6390,7 +6640,7 @@ function middleHandler_ticket_edit_system_email_ticket_assignment(req, res, next
 		var subject = "Ticket Assignment for @@pname - @@ticketno"
 			req.sendmail_subject = replace_all_array(subject, req.tickets[0]);
 		var body = replace_all_array(system_email_ticket_assignment, req.tickets[0]);
-			body = replace_all_array(body, {sport: env.guest_server, status: _ticket_status_labels[req.ticket_update_status]})
+			body = replace_all_array(body, {sport: env.server, status: _ticket_status_labels[req.ticket_update_status]})
 			body = body.replace('@@ticket_history', req.ticket_history);
 		req.sendmail_text = body
 		req.sendmail_html = body
@@ -6464,7 +6714,7 @@ function middleHandler_ticket_edit_system_email_system_defaults(req, res, next) 
 		var subject = "Guest Inquiry Awaiting Approval for @@pname - @@ticketno"
 			req.sendmail_subject = replace_all_array(subject, req.tickets[0]);
 		var body = replace_all_array(system_email_waiting_body, req.tickets[0]);
-			body = replace_all_array(body, {sport: env.guest_server, status: _ticket_status_labels[req.ticket_update_status]})
+			body = replace_all_array(body, {sport: env.server, status: _ticket_status_labels[req.ticket_update_status]})
 			body = body.replace('@@ticket_history', req.ticket_history);
 		req.sendmail_text = body
 		req.sendmail_html = body
@@ -6474,7 +6724,7 @@ function middleHandler_ticket_edit_system_email_system_defaults(req, res, next) 
 		var subject = "Guest Inquiries Notification for @@pname - @@ticketno"
 			req.sendmail_subject = replace_all_array(subject, req.tickets[0]);
 		var body = replace_all_array(system_email_attention_body, req.tickets[0]);
-			body = replace_all_array(body, {sport: env.guest_server, status: _ticket_status_labels[req.ticket_update_status]})
+			body = replace_all_array(body, {sport: env.server, status: _ticket_status_labels[req.ticket_update_status]})
 			body = body.replace('@@ticket_history', req.ticket_history);
 		req.sendmail_text = body
 		req.sendmail_html = body
@@ -6524,7 +6774,7 @@ function middleHandler_db_ticket_edit_file_elinks(req, res, next) {
 				original_name: row.original_name,
 				dateadded: row.dateadded,
 				ft: row.original_name.split(".")[1],
-				server: env.guest_server
+				server: env.server
 			})
 			next();
 		});
@@ -6589,7 +6839,7 @@ function middleHandler_email_prep_ticket_edit_guest_message(req, res, next) {
 				fname: req.ticket_old_row[0]['fname'],
 				mi: req.ticket_old_row[0]['mi'],
 				lname: req.ticket_old_row[0]['lname'],				
-				server: env.guest_server,
+				server: env.server,
 				filelinks_text: files_text,
 				filelinks_html: files_html
 			}
@@ -6941,7 +7191,7 @@ restapi.get('/tickets',
 			bit = bit.replace('@@bottombuttons', bottombuttons);
 			var linksite_button = _linksite_button.replace('@@linksite', req.prop_linksite)
 			//todo before production
-			linksite_button = linksite_button.replace('http://guest.rbpsoftwaresolutions.com', env.guest_server)
+			linksite_button = linksite_button.replace('http://guest.rbpsoftwaresolutions.com', env.server)
 			bit = bit.replace('@@linkpropbutton', linksite_button)
 			bit = replace_all(bit, '@@status', req.query.status)	
 		}
@@ -9502,8 +9752,8 @@ function middleHandler_email_prep_reset_password(req, res, next) {
 		}, function () {
 			req.sendmail_from = env.sendmail_from_noreply
 			req.sendmail_subject = 'RBP Software Solutions - Password Reset'
-			req.sendmail_text = '\nTo reset your password on RBP Software Solutions, click on the following link or copy and past the link into your web browser.\n\n'+env.guest_server+'/associate/pwres?xcode='+g+'\n\nSupport: 415-794-5262'
-			req.sendmail_html = 'To reset your password on RBP Software Solutions, click on the following link or copy and past the link into your web browser.</p><br><a rel=\"nofollow\" target=\"_blank\" href=\"'+env.guest_server+'/associate/pwres?xcode='+g+'\">'+env.guest_server+'/associate/pwres?xcode='+g+'</a><br><br>Support: 415-794-5262'
+			req.sendmail_text = '\nTo reset your password on RBP Software Solutions, click on the following link or copy and past the link into your web browser.\n\n'+env.server+'/associate/pwres?xcode='+g+'\n\nSupport: 415-794-5262'
+			req.sendmail_html = 'To reset your password on RBP Software Solutions, click on the following link or copy and past the link into your web browser.</p><br><a rel=\"nofollow\" target=\"_blank\" href=\"'+env.server+'/associate/pwres?xcode='+g+'\">'+env.server+'/associate/pwres?xcode='+g+'</a><br><br>Support: 415-794-5262'
 			req.sendmail_okresponse = 'Password reset email sent'
 			next();
 		});		
@@ -11131,16 +11381,21 @@ const _sql_single_ticket = (function () {/*
 	LEFT OUTER JOIN inquiries ON tickets.catID = inquiries.autoID	
 	LEFT OUTER JOIN ticket_locking ON tickets.autoID = ticket_locking.ticketID
 	LEFT OUTER JOIN users ON tickets.first_assignmentID = users.autoID
-	ORDER BY tickets.autoID desc LIMIT 1
+	WHERE tickets.autoID = @@id
+	ORDER BY tickets.autoID desc 
 	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
 
 //todo change this to not use limit 1	
 function middleHandler_db_get_last_ticket_inserted(req, res, next) {
-	//console.log("  middleHandler_db_get_last_ticket_inserted "+req.errors.length);	
+	if(true){
+		console.log("  middleHandler_db_get_last_ticket_inserted ");	
+		console.log(req.guest_ticket_last_row)
+		console.log(req.guest_ticket_inserted)
+	}
 	req.tickets = [];
 	//removed req.userid > 0 
-	if(req.errors.length == 0){		
-		var sql = _sql_single_ticket		
+	if(req.errors.length == 0 && req.guest_ticket_inserted == 1 && req.guest_ticket_last_row > 0){		
+		var sql = _sql_single_ticket.replace('@@id', req.guest_ticket_last_row)
 		//console.log(sql)
 		db.each(sql, function(err, row) {
 			var val = {id: row.autoID, 
@@ -11480,7 +11735,7 @@ function middleHandler_ticket_get_files(req, res, next) {
 			if(row.userid == 0){username = "Guest"}else{username = row.username}
 			var val = {id: row.fid, userid: row.userid, tid: row.ticketid, content: row.content, 
 			file: row.content,
-			server: env.guest_server,
+			server: env.server,
 			ext: row.content.split('.')[1],
 			original_name: row.original_name, dateadd: row.dateadd, username: username}
 			req.ticket_files.push(val);
@@ -11892,12 +12147,8 @@ restapi.get('/download', function(req,res){
 restapi.get('/training', 
 	function(req,res){		
 	//console.log("/training");
-	//res.write("<div style='padding:20px;'><p>Under Construction</p></div>")
-	//res.end();
-	//res.sendFile(path.join(__dirname + '/html/Admin_Guide_v3.1.1.htm'));
-	res.sendFile(path.join(__dirname + '/public/Admin_Guide_v3.1.3.htm'));
-	//res.sendFile(path.join(__dirname + '/html/Administrator Guide Manual 3.1 - RBP Guest Inquiries.htm'));
-
+	res.write("<div style='padding:20px;'><p>Under Construction</p></div>")
+	res.end();
 })
 
 restapi.get('/logout',
@@ -12171,7 +12422,7 @@ function middleHandler_guest_code_check(req, res, next) {
 	//console.log("  middleHandler_guest_code_check " + req.query.id);						
 	var sql = _sql_db_check_guest_code.replace('@@code', req.query.id)
 	req.guest_code_pid = 0
-	//req.guest_code_css_url = 'http://127.0.0.1:4349/GrandHotel/css/style.css'
+	req.guest_code_css_url = ''
 	db.each(sql, function(err, row) {						
 		//todo add error handler		
 		req.guest_code_pid = row.autoID
@@ -12222,72 +12473,57 @@ restapi.get('/guest-login',
 	middleHandler_guest_custom,
 	
 	function(req, res){
-		//console.log('/guest-login '+req.query.id )
-		var html = "Error Guest Login2"
-		if(req.guest_code_pid > 0) {
-
-			//restapi.engine('html', swig.guest_login);
-
-			//as default, set HTML <style> element to css string to _guest_gen_css with propID in place of @@id
-			var css = replace_all_array(_guest_gen_css, {id: req.query.id})	
-			var csslink = "<style>" + css + "</style>"
-
-			//if there is an entry in the database for db.properties.css_url (currently only used with demo for Grand Hotel)
-				//then sets the HTML css to the url given there, which points to a .css file. 
-				//this db entry is queried in middleHandler_guest_code_check
-			if (req.guest_code_css_url!='') {
-				csslink = "<link href='"+req.guest_code_css_url+"' rel='stylesheet' type='text/css'>"
-			}
-
-			var ps = req.query.id+'-0'
-			var eq = "[a-z0-9._%+-]+@[=a-z0-9.-]+\[a-z]{2,3}&#36;"; //&#36; replaces $
-			var inputs = guest_input(1, 2, ps, "fname", "First Name", "text", "", "First Name","")
-
-
-			//
-			//TODO (from DD) #append inputs [guest_input 0 3 $ps mi "Middle Initial" text "" ""]
-			inputs += guest_input(1, 3, ps, "lname", "Last Name", "text", "", "Last Name","")
-			inputs += guest_input(1, 4, ps, "room", "Room #", "text", "[0-9]{1-5}", "Room Number","")
-			inputs += guest_input(1, 6, ps, "checkin", "Check In Date", "date", "\d{1,2}/\d{1/2}/\d{1,4}", "mm/dd/yyyy","")
-			inputs += guest_input(1, 7, ps, "checkout", "Check Out Date", "date", "\d{1,2}/\d{1/2}/\d{1,4}", "mm/dd/yyyy","")
-			inputs += guest_input(1, 8, ps, "email", "Email Address", "email", eq, "Enter your email address here","")
-			inputs += guest_input(1, 9, ps, "email2", "Re-Enter Email", "email", eq, "Re-enter your email address here","")
+	//console.log('/guest-login '+req.query.id )
+	var html = "Error Guest Login2"
+	if(req.guest_code_pid > 0) {
+		var css = replace_all_array(_guest_gen_css, {id: req.query.id})	
+		var csslink = "<style>"+css+"</style>"
+		if(req.guest_code_css_url!=''){csslink = "<link href='"+req.guest_code_css_url+"' rel='stylesheet' type='text/css'>"}
+		var ps = req.query.id+'-0'
+		var eq = "[a-z0-9._%+-]+@[=a-z0-9.-]+\[a-z]{2,3}&#36;"; //&#36; replaces $
+		var inputs = guest_input(1, 2, ps, "fname", "First Name", "text", "", "First Name","")
+		//#append inputs [guest_input 0 3 $ps mi "Middle Initial" text "" ""]
+		inputs += guest_input(1, 3, ps, "lname", "Last Name", "text", "", "Last Name","")
+		inputs += guest_input(1, 4, ps, "room", "Room #", "text", "[0-9]{1-5}", "Room Number","")
+		inputs += guest_input(1, 5, ps, "lastfour", "Last Four", "text", "[0-9]{4,4}", "CC Last 4 Digits","style='display:none;'")
+		inputs += guest_input(1, 6, ps, "checkin", "Check In Date", "date", "\d{1,2}/\d{1/2}/\d{1,4}", "mm/dd/yyyy","")
+		inputs += guest_input(1, 7, ps, "checkout", "Check Out Date", "date", "\d{1,2}/\d{1/2}/\d{1,4}", "mm/dd/yyyy","")
+		inputs += guest_input(1, 8, ps, "email", "Email Address", "email", eq, "Enter your email address here","")
+		inputs += guest_input(1, 9, ps, "email2", "Re-Enter Email Address", "email", eq, "Re-enter your email address here","")
+	
+		inputs += guest_input(1, 10, ps, "phone", "Phone", "phone", "\d{3}[\-]\d{3}[\-]\d{4}", "Enter your phone number here","")
+	
+		var morebox = guest_input(1, 12, ps, "cancellation", "Confirmation #", "text", "", "","")
+		morebox += guest_input(1, 13, ps, "spg", "SPG #", "text", "", "")
+		morebox += guest_input(1, 14, ps, "amount", "Refund Requested", "number", "", "","")
 		
-			inputs += guest_input(1, 10, ps, "phone", "Phone", "phone", "\d{3}[\-]\d{3}[\-]\d{4}", "Enter your phone number here","")
-			inputs += guest_input(1, 5, ps, "lastfour", "Last Four", "text", "[0-9]{4,4}", "CC Last 4 Digits","style='display:none;'")
+		var displays = guest_display(ps, "itype", "Request Type")
+		displays += guest_display(ps, "name", "Name")
+		displays += guest_display(ps, "room", "Room")
+		displays += guest_display(ps, "lastfour", "CC Last 4 Digits")		
+		displays += guest_display(ps, "dates", "Dates")
+		displays += guest_display(ps, "email", "Email Address")
+		displays += guest_display(ps, "phone", "Phone")
+
+		var moredsp = guest_display(ps, "cancellation", "Confirmation #")
+		moredsp += guest_display(ps, "spg", "SPG #")
+		moredsp += guest_display(ps, "amount", "Refund Requested")
+
 		
-			var morebox = guest_input(1, 12, ps, "cancellation", "Confirmation #", "text", "", "","")
-			morebox += guest_input(1, 13, ps, "spg", "SPG #", "text", "", "")
-			morebox += guest_input(1, 14, ps, "amount", "Refund Requested", "number", "", "","")
-			
-			var displays = guest_display(ps, "itype", "Request Type")
-			displays += guest_display(ps, "name", "Name")
-			displays += guest_display(ps, "room", "Room")		
-			displays += guest_display(ps, "dates", "Dates")
-			displays += guest_display(ps, "email", "Email Address")
-			displays += guest_display(ps, "phone", "Phone")
-			displays += guest_display(ps, "lastfour", "CC Last 4 Digits")
-
-			var moredsp = guest_display(ps, "cancellation", "Confirmation #")
-			moredsp += guest_display(ps, "spg", "SPG #")
-			moredsp += guest_display(ps, "amount", "Refund Requested")
-
-			//use Swig to render template variables in user_login.html
-			res.render('guest_login', { 
-				'inputs' : inputs, 
-				'morebox': morebox, 
-				'displays': displays, 
-				'moredsp': moredsp, 
-				'para2': req.guest_custom_para2, 
-				'ps': req.query.id + '-0',
-				'csslink' : csslink
-			})
-			return
-		}
-		res.write(html)
-		res.end()
+		html = _guest_login_page.replace('@@js', _guest_login_js)
+		html = html.replace('@@inputs', inputs)
+		html = html.replace('@@morebox', morebox)
+		html = html.replace('@@displays', displays)
+		html = html.replace('@@moredsp', moredsp)
+		html = html.replace('@@para2', req.guest_custom_para2)
+		html = replace_all_array(html, {
+			ps: req.query.id+'-0',
+			csslink: csslink
+		})
 	}
-)
+	res.write(html)
+	res.end()
+})
 
 const _sql_db_guest_validate_property = (function () {/*  
 	SELECT autoID as pid FROM properties WHERE hid = '@@prop'
@@ -12395,6 +12631,7 @@ const _sql_db_guest_insert_ticket = (function () {/*
 function middleHandler_guest_request_insert_ticket(req, res, next) {	
 	//console.log("  middleHandler_guest_request_insert_ticket " + req.errors.length);	
 	req.guest_ticket_inserted = 0
+	req.guest_ticket_last_row = 0
 	req.guest_ticket_gcode = ''
 	if(req.errors.length==0){
 		var d = new Date
@@ -12435,6 +12672,7 @@ function middleHandler_guest_request_insert_ticket(req, res, next) {
 		db.run(sql, function(err) {									
 		}, function (err) {		
 			req.guest_ticket_inserted = 1
+			req.guest_ticket_last_row = this['lastID']	
 			next()
 		});
 	}else{
@@ -12515,7 +12753,7 @@ function middleHandler_guest_request_message(req, res, next) {
 		req.sendmail_to = req.query.em.toLowerCase();
 		req.sendmail_subject = req.em_subject;
 		var body = req.em_body		
-		var params = {sport: env.guest_server, id: req.tickets[0]['id'], gcode: req.guest_ticket_gcode, fname: req.tickets[0]['fname'], lname: req.tickets[0]['lname'], tdate: req.tickets[0]['tdate'], email: req.tickets[0]['email'], description: req.tickets[0]['description']}
+		var params = {sport: env.server, id: req.tickets[0]['id'], gcode: req.guest_ticket_gcode, fname: req.tickets[0]['fname'], lname: req.tickets[0]['lname'], tdate: req.tickets[0]['tdate'], email: req.tickets[0]['email'], description: req.tickets[0]['description']}
 		req.sendmail_text = body + replace_all_array(_em_link_text, params)
 		req.sendmail_html = body + replace_all_array(_em_link_html, params)
 		req.sendmail_okresponse = 'Message sent.'
@@ -12774,7 +13012,7 @@ restapi.get('/guest/ticket/comment',
 		var html = _guest_ticket_page.replace('<<bigheader>>', _bigheader);
 		html = replace_all_array(html, {id: req.query.id, gcode: req.query.gcode})
 		var form =  replace_all_array(_guest_ticket_form, req.guest_ticket[0])		
-		form = replace_all_array(form, {id: req.query.id, upload_token: req.query.gcode, xport: env.guest_server})
+		form = replace_all_array(form, {id: req.query.id, upload_token: req.query.gcode, xport: env.server})
 		html = html.replace('@@content', form)
 		html = html.replace('@@history', history)
 	}
@@ -12814,7 +13052,7 @@ restapi.get('/guest/ticket/comment/accept',
 	middleHandler_guest_only_insert_status,
 	function(req, res){
 	if(_debug){
-		console.log('/guest/ticket/comment/accept '+ req.query.id )	
+		console.log('/guest/ticket/comment/accept '+req.query.id )	
 		console.log(req.guest_ticket[0])
 	}
 	res.write('')
@@ -12838,7 +13076,7 @@ const _grand_hotel_home = (function () {/*
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 		<link href="/GrandHotel/css/style.css" rel="stylesheet" type="text/css" media="all" />
 		</head>
-		<body id="body1">
+		<body>
 		<div class="wrap">
 		<div class="header">
 			<div class="logo">
@@ -13105,7 +13343,7 @@ const _grand_hotel_about = (function () {/*
 				<a>privacy statement </a>
 			</div>
 			<div class="f-copyrights">
-				<p>ï¿½ all rights reserved | Designed by  <a href="http://w3layouts.com/">W3Layouts</a></p>	
+				<p>© all rights reserved | Designed by  <a href="http://w3layouts.com/">W3Layouts</a></p>	
 			</div>
 			<div class="clear"></div>
 		</div>
@@ -13285,7 +13523,7 @@ const _grand_hotel_booking = (function () {/*
 				<a>privacy statement </a>
 			</div>
 			<div class="f-copyrights">
-				<p>ï¿½ all rights reserved | Designed by  <a href="http://w3layouts.com/">W3Layouts</a></p>	
+				<p>© all rights reserved | Designed by  <a href="http://w3layouts.com/">W3Layouts</a></p>	
 			</div>
 			<div class="clear"></div>
 		</div>
@@ -13409,7 +13647,7 @@ const _grand_hotel_contact = (function () {/*
 				<a>privacy statement </a>
 			</div>
 			<div class="f-copyrights">
-				<p>ï¿½ all rights reserved | Designed by  <a href="http://w3layouts.com/">W3Layouts</a></p>	
+				<p>© all rights reserved | Designed by  <a href="http://w3layouts.com/">W3Layouts</a></p>	
 			</div>
 			<div class="clear"></div>
 		</div>
@@ -13433,7 +13671,7 @@ const _grand_hotel_inquiry = (function () {/*
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 		<link href="/GrandHotel/css/style.css" rel="stylesheet" type="text/css" media="all" />
 		</head>
-		<body id="body1">
+		<body>
 		<div class="wrap">
 		<div class="header">
 			<div class="logo">
@@ -13518,7 +13756,7 @@ const _grand_hotel_inquiry = (function () {/*
 				<a>privacy statement </a>
 			</div>
 			<div class="f-copyrights">
-				<p>ï¿½ all rights reserved | Designed by  <a href="http://w3layouts.com/">W3Layouts</a></p>	
+				<p>© all rights reserved | Designed by  <a href="http://w3layouts.com/">W3Layouts</a></p>	
 			</div>
 			<div class="clear"></div>
 		</div>
@@ -13532,7 +13770,7 @@ restapi.get('/GrandHotel/index.html', function(req, res){res.write(_grand_hotel_
 restapi.get('/GrandHotel/about.html', function(req, res){res.write(_grand_hotel_about); res.end();})	
 restapi.get('/GrandHotel/booking.html', function(req, res){res.write(_grand_hotel_booking); res.end();})	
 restapi.get('/GrandHotel/contact.html', function(req, res){res.write(_grand_hotel_contact); res.end();})	
-restapi.get('/GrandHotel/inquiry.html', function(req, res){res.write(_grand_hotel_inquiry.replace('@@sport', env.guest_server)); res.end();})	
+restapi.get('/GrandHotel/inquiry.html', function(req, res){res.write(_grand_hotel_inquiry.replace('@@sport', env.server)); res.end();})	
 restapi.use("/GrandHotel/css", express.static(__dirname + '/GrandHotel/css'));
 restapi.use("/GrandHotel/images", express.static(__dirname + '/GrandHotel/images'));
 
@@ -13586,4 +13824,4 @@ io.on('connection',
 	})
 });
 
-console.log("RBP is running as "+ env.env);
+console.log("RBP is running as "+env.env);

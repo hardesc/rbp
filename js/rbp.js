@@ -152,11 +152,9 @@ function dlgfilecheck(){
 	}
 }
 
-//normally used for js onkeyup event (hence "atku")... if element found by id and has value, set the borderColor to ""
-//input = HTML element
-//output = if element's value length > 0, change style.borderColor to ""
-function atku(e) {
-	if (gdv(e.id).length > 0) { e.style.borderColor="" }
+
+function atku(e){
+	if(gdv(e.id).length>0){e.style.borderColor=""}
 }
 
 var _emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
@@ -541,18 +539,11 @@ function showjustdemo(){
 	
 
 function page(r){
-	if(close_ticket_edits()){return}
-	var a = _z(r);
-	a.onreadystatechange = function(){
-		if(a.readyState == 4){
-			sdtn("guestpage");
-			sdtn("worktabs");
-			sdtn("reports");
-			sdtn("admin");
-			sdi("pages",a.responseText);
-		}
-	};_h(a);
-}
+if(close_ticket_edits()){return}
+var a=_z(r);a.onreadystatechange=function(){if(a.readyState==4){
+sdtn("guestpage");sdtn("worktabs");sdtn("reports");sdtn("admin");
+sdi("pages",a.responseText);
+}};_h(a);}
 
 function logout(){
 var a=_z("/logout?");a.onreadystatechange=function(){if(a.readyState==4){
@@ -706,220 +697,63 @@ function ticketreqlabel(){
 	}
 }
 	
-//GET ELEMENT BY ID
+
 function gebi(t){var e=document.getElementById(t);if(e){return e;}else{return null;}}
 function isArray(e){if (e.constructor.toString().indexOf('Array')==-1){return false;}else{return true;}}
-
-//display an array of element ids "ar" as display="d"
 function dspArray(ar,d){var e;
-	if (isArray(ar)) {
-		var ln=ar.length;
-		for(var i=0;i<ln;i++){
-			e=gebi(ar[i]);
-			if(e){e.style.display=d;}
-			else{
-				if(document.layers){document.ar[i].display=d;}
-				else{alert('error with ' + ar[i]);}
-			}
-		}
-	}
-	else {
-		e=gebi(ar);
-		if(e){e.style.display=d;}
-		else{
-			if(document.layers){document.ar.display=d;}
-			else{/*alert('error with ' + ar);*/}
-		}
-	}
-}
-
-//set display in dspArray() to 'none'
+	if(isArray(ar)){var ln=ar.length;for(var i=0;i<ln;i++){e=gebi(ar[i]);if(e){e.style.display=d;}else{if(document.layers){document.ar[i].display=d;}else{alert('error with ' + ar[i]);}}}
+	}else{e=gebi(ar);if(e){e.style.display=d;}else{if(document.layers){document.ar.display=d;}else{/*alert('error with ' + ar);*/}}}}
 function sdtn(ar){dspArray(ar,'none');}
 
-function cd(ar){
-	if(isArray(ar)){
-		var ln=ar.length;
-		for (var i=0;i<ln;i++){
-			sdi(ar[i],'');
-		}
-	}
-	else{sdi(ar,'');}
-}
 
-//return array "a", at index "x"
+function cd(ar){if(isArray(ar)){var ln=ar.length;for (var i=0;i<ln;i++){sdi(ar[i],'');}}else{sdi(ar,'');}}
 function ar(a,x){return a[x]}
-
-//set display of array to 'inline'
-function sdi(t,v){
-
-	var e = gebi(t);
-	if (e) {
-		e = replaceHtml(e,v);
-		dspArray(t,'inline');
-	}
-}
-
-function sdh(t,v) {
-
-	var e = gebi(t);
-	if(e) {
-		e = replaceHtml(e,v);
-		sdtn(t);
-	}
-}
-
-function sib(t,v) {
-
-	var e = gebi(t);
-	if (e) {
-		e = replaceHtml(e,v);
-		dspArray(t,'inline-block');
-	}
-}
-
-function skb(t,v) {
-
-	var e = gebi(t);
-	if (e) {
-		e = replaceHtml(e,v);
-		dspArray(t,'block');
-	}
-}
-
-function skd(t,v) {
-
-	var e = gebi(t);
-	if (e) {
-		e = replaceHtml(e,v);
-		dspArray(t,'');
-	}
-}
-
-function gdi(t) {
-
-	var e = gebi(t);
-	if(e) {
-		return gebi(t).innerHTML;
-	}
-	else {return null;}
-}
-
-//return value of HTML element by id; if no element found by id, return null
-function gdv(t) {
-	var e = gebi(t);
-	if (e) {
-		return gebi(t).value;
-	}
-	else {return null;}
-}
-
-function gedv(t) {
-
-	console.log(t);
-	if (t==null) {
-		t = "";
-	}
-	return encode(gdv(t))
-}
-
-function sdv(t,v) {
-	var e = gebi(t);
-	if (e) {
-		gebi(t).value = v;
-	}
-}
-
-function replaceHtml(e,h) {
-	var oe = typeof e==='string'? gebi(e) : e;
-	var ne = oe.cloneNode(false);
-	ne.innerHTML = h;
-	oe.parentNode.replaceChild(ne,oe);
-	return ne;
-}
-
-function trim(str) {
-	return str.replace(/^\\s\\s*/, '').replace(/\\s\\s*$/, '');
-}
-
-function sC(id,cls) {
-	var e = gebi(id);
-	if (e) {
-		e.setAttribute('class',cls);
-		e.setAttribute('className',cls);
-	}
-	else {alert(id + ' js error');}
-}
-
-function aC(id,cls) {
-	var e = gebi(id);
-	if (e) {
-		var s = e.getAttribute('class');
-		e.setAttribute('class',s+' '+cls);
-		e.setAttribute('className',s+' '+cls);
-	}
-}
-
-function gC(id) {
-	var e = gebi(id);
-	var c = e.getAttribute('class');
-	if (c == null) {return '';}
-	return trim(c);
-}
-
-function rC(id,cls) {
-	console.log(id + ' ' + cls);
-	var e = gebi(id);
-	if(e) {
-		if (e.getAttribute('class').length > 0) {
-			var ca = e.getAttribute('class').split(' ');
-			var nc = '';
-			for (var x = 0; x < ca.length; x++) {
-				if(ca[x] != cls) {
+function sdi(t,v){var e=gebi(t);if(e){e=replaceHtml(e,v);dspArray(t,'inline');}}
+function sdh(t,v){var e=gebi(t);if(e){e=replaceHtml(e,v);sdtn(t);}}
+function sib(t,v){var e=gebi(t);if(e){e=replaceHtml(e,v);dspArray(t,'inline-block');}}
+function skb(t,v){var e=gebi(t);if(e){e=replaceHtml(e,v);dspArray(t,'block');}}
+function skd(t,v){var e=gebi(t);if(e){e=replaceHtml(e,v);dspArray(t,'');}}
+function gdi(t){var e=gebi(t);if(e){return gebi(t).innerHTML;}else{return null;}}
+function gdv(t){var e=gebi(t);if(e){return gebi(t).value;}else{return null;}}
+function gedv(t){console.log(t);if(t==null){t=""};return encode(gdv(t))}
+function sdv(t,v){var e=gebi(t);if(e){gebi(t).value=v;}}
+function replaceHtml(e,h) {var oe=typeof e==='string'?gebi(e):e;var ne=oe.cloneNode(false);ne.innerHTML=h;oe.parentNode.replaceChild(ne,oe);return ne;};
+function trim(str){return str.replace(/^\\s\\s*/, '').replace(/\\s\\s*$/, '');}
+function sC(id,cls){var e=gebi(id);if(e){e.setAttribute('class',cls);e.setAttribute('className',cls);}else {alert(id + ' js error');}}
+function aC(id,cls){var e=gebi(id);if(e){var s=e.getAttribute('class'); e.setAttribute('class',s+' '+cls);e.setAttribute('className',s+' '+cls);}}
+function gC(id){var e=gebi(id);var c = e.getAttribute('class'); if (c == null) {return ''}; return trim(c);}
+function rC(id,cls){
+	console.log(id + ' ' + cls)
+	var e=gebi(id);
+	if(e){
+		if(e.getAttribute('class').length>0){
+			var ca=e.getAttribute('class').split(' ');
+			var nc='';
+			for(var x=0;x<ca.length;x++){
+				if(ca[x]==cls){
+				
+				} else {
 					nc = nc + ca[x] + ' ';
 				}
-			}
-			sC(id, nc);
+			};
+			sC(id,nc);
 		}
 	}
 }
-
 function hC(e,cls){
-	if(e) {
+	if(e){
 		var ca = e.getAttribute('class').split(" ");
-		for (var x = 0; x < ca.length; x++) {
-			if (ca[x] == cls) {return true}
+		for (var x=0;x<ca.length;x++){
+			if (ca[x]==cls){return true}
 		}
 		var ca = e.getAttribute('className').split(" ");
-		for (var x = 0; x < ca.length; x++) {
-			if (ca[x] == cls) {return true}
+		for (var x=0;x<ca.length;x++){
+			if (ca[x]==cls){return true}
 		}		
 	}
 	return false;
-}
-
-//create XMLHttpRequest object as '<f>&rnd=<random number>', open GET request with it
-function _z(f) {
-	var a;
-	f += '&rnd=' + Math.floor(Math.random()*99999);
-	try{ a = new XMLHttpRequest();} 
-	catch (e1){
-		try{ a=new ActiveXObject('Msxml2.XMLHTTP');} 
-		catch (e2) {
-			try{ a=new ActiveXObject('Microsoft.XMLHTTP');} 
-			catch (e3){
-				alert('ERR!');
-				return false;
-			} 
-		} 
-	} 
-	try{ a.open('GET',f);}
-	catch (e4) {
-		alert(e4);
-		alert(f);
-		return false;
-	};
-	return a;
-}
+	}
+function _z(f){var a;f += '&rnd=' + Math.floor(Math.random()*99999);try{ a=new XMLHttpRequest();} catch (e1){try{ a=new ActiveXObject('Msxml2.XMLHTTP');} catch (e2) {try{ a=new ActiveXObject('Microsoft.XMLHTTP');} catch (e3){alert('ERR!');return false;} } } try{ a.open('GET',f);}catch (e4) {alert(e4);alert(f);return false;};return a;}
 function _h(a){a.setRequestHeader('Content-type','application/x-www-form-urlencoded');a.send();}	
 function encode(s){
 	if(s.length == 0 || s == null){return ""}
