@@ -818,7 +818,7 @@ function init_regis(){
 	if(p){		
 		$("#pw1").val("");
 		$("#pw2").val("");
-		root_login("/home3?p1="+p1+"&p2="+p2+"&n2="+encode(nick2),"worktabs");				
+		root_login("/home3?p="+p1+"&n2="+encode(nick2),"worktabs");				
 	} else {
 		if(!p){
 			$("#pw1").css('borderColor', 'red');
@@ -863,7 +863,7 @@ function init_reset(){
 	if(p){		
 		$("#rpw1").val("");
 		$("#rpw2").val("");
-		root_login("/home3?p1="+p1+"&p2="+p2+"&n2="+encode(nick2),"worktabs");				
+		root_login("/home3?p="+p1+"&n2="+encode(nick2),"worktabs");				
 	} else {
 		if(!p){
 			$("#rpw1").css('borderColor', 'red');
