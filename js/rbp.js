@@ -491,8 +491,10 @@ function reopent(r,id){
 function home(){
 	sdtn("pages");sdtn("admin");sdtn("reports");	
 	if(_root_status == "login"){
+		$("#justdemo").hide();
 		$(".modulepage").hide()
 		$("#supportcontainer").hide();
+		$("#homecontainer").show();
 		$(".guesttitle").fadeIn(500)
 		$(".guestpage").fadeIn(1500)
 		sdtn("worktabs");		
@@ -504,13 +506,15 @@ function home(){
 }
 
 function modules(){
+	$("#justdemo").hide();
 	$(".guestpage").hide()
 	$("#supportcontainer").hide();
+	$("#homecontainer").show();
 	$(".modulepage").fadeIn(1500)
 	$("html, body").animate({ scrollTop: 0 }, 800);
 }
-
 function showblog(){
+	$("#justdemo").hide();
 	$(".guesttitle").hide();
 	$(".guestpage").hide();
 	$("#supportcontainer").hide();
