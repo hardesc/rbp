@@ -11381,16 +11381,21 @@ const _sql_single_ticket = (function () {/*
 	LEFT OUTER JOIN inquiries ON tickets.catID = inquiries.autoID	
 	LEFT OUTER JOIN ticket_locking ON tickets.autoID = ticket_locking.ticketID
 	LEFT OUTER JOIN users ON tickets.first_assignmentID = users.autoID
-	ORDER BY tickets.autoID desc LIMIT 1
+	WHERE tickets.autoID = @@id
+	ORDER BY tickets.autoID desc 
 	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
 
 //todo change this to not use limit 1	
 function middleHandler_db_get_last_ticket_inserted(req, res, next) {
-	//console.log("  middleHandler_db_get_last_ticket_inserted "+req.errors.length);	
+	if(true){
+		console.log("  middleHandler_db_get_last_ticket_inserted ");	
+		console.log(req.guest_ticket_last_row)
+		console.log(req.guest_ticket_inserted)
+	}
 	req.tickets = [];
 	//removed req.userid > 0 
-	if(req.errors.length == 0){		
-		var sql = _sql_single_ticket		
+	if(req.errors.length == 0 && req.guest_ticket_inserted == 1 && req.guest_ticket_last_row > 0){		
+		var sql = _sql_single_ticket.replace('@@id', req.guest_ticket_last_row)
 		//console.log(sql)
 		db.each(sql, function(err, row) {
 			var val = {id: row.autoID, 
@@ -12626,6 +12631,7 @@ const _sql_db_guest_insert_ticket = (function () {/*
 function middleHandler_guest_request_insert_ticket(req, res, next) {	
 	//console.log("  middleHandler_guest_request_insert_ticket " + req.errors.length);	
 	req.guest_ticket_inserted = 0
+	req.guest_ticket_last_row = 0
 	req.guest_ticket_gcode = ''
 	if(req.errors.length==0){
 		var d = new Date
@@ -12666,6 +12672,7 @@ function middleHandler_guest_request_insert_ticket(req, res, next) {
 		db.run(sql, function(err) {									
 		}, function (err) {		
 			req.guest_ticket_inserted = 1
+			req.guest_ticket_last_row = this['lastID']	
 			next()
 		});
 	}else{
