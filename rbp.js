@@ -14,7 +14,7 @@ var env = require('./rbp_env.json');
 var _debug = false;
 var _skiplogin = 0; //todo make startup params
 
-if(env.env == "development") {_skiplogin = 0}
+if(env.env == "development") {_skiplogin = 1}
 var _adminemail = env.admin_email
 
 var crypto = require('crypto');
@@ -6041,7 +6041,7 @@ restapi.get('/home',
 	middleHandler_db_get_user_login_cookie_factory, 
 	
 	function(req,res){	
-	if(true){console.log('/home e='+req.query.e+' p='+req.query.p);}
+	if(_debug){console.log('/home e='+req.query.e+' p='+req.query.p);}
 	var r = req.query.r; if(r == ''){r=0}
 	var propid = r;
 		
@@ -6182,10 +6182,9 @@ restapi.get('/home3',
 	middleHandler_db_get_user_properties,
 	middleHandler_db_get_user_login_cookie_factory,
 	function(req,res){	
-	if(true){
+	if(_debug){
 		console.log('/home3')
 		console.log(req.email);
-		console.log(req.query)
 	}
 	req.user_register=0	
 	req.user_resetpw=0
@@ -7142,13 +7141,6 @@ restapi.get('/ticketct',
 	
 })
 
-const _oops = (function () {/*  	
-<div style='padding:10px;'>Oops!  There was a problem with your account.  Please <div style='display:inline; text-decoration:underline;cursor:pointer' onclick='page("/support?");'>contact support</div></div>
-	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
-
-
-
-
 restapi.get('/tickets',
 	middleHandler_cookie_check,
 	middleHandler_db_check_user_supplied_property, 
@@ -7163,40 +7155,36 @@ restapi.get('/tickets',
 	
 	var rows = '';
 	var scriptlist = []
-	if(req.tickets){
-		for(var x=0;x<req.tickets.length;x++){
-			var bubble = comment_bubble(req.tickets[x]['bubble_status'])
-			if(req.incoming_test_key != "" && req.incoming_test_cnt > 0) {
-				scriptlist.push(req.tickets[x]['id']+":"+req.tickets[x]['ticketno'])		
-			} else {
-				var row = replace_all_array(_ticket_tr, req.tickets[x])
-				row = replace_all_array(row, {status: req.query.status, prop: req.propid, bubble: bubble})
-				rows+=row;			
-			}		
-		}
-		
+	for(var x=0;x<req.tickets.length;x++){
+		var bubble = comment_bubble(req.tickets[x]['bubble_status'])
 		if(req.incoming_test_key != "" && req.incoming_test_cnt > 0) {
-			var bit = scriptlist.join(";")
+			scriptlist.push(req.tickets[x]['id']+":"+req.tickets[x]['ticketno'])		
 		} else {
-			var bit = _tickets_table;
-			var bottombuttons = '';
-			if(req.query.status==STATUS_SUBMITTED){
-				bottombuttons = replace_all_array(_bottom_button, {status: req.query.status, prop: req.propid});
-			}
-			bottombuttons+=_bottom_search;
-			
-			var pages = ppages(req.tickets.length, _ticket_pages, '@@count')
-			bit = bit.replace('@@table_rows', rows);
-			bit = bit.replace('@@pages', pages);
-			bit = bit.replace('@@bottombuttons', bottombuttons);
-			var linksite_button = _linksite_button.replace('@@linksite', req.prop_linksite)
-			//todo before production
-			linksite_button = linksite_button.replace('http://guest.rbpsoftwaresolutions.com', env.server)
-			bit = bit.replace('@@linkpropbutton', linksite_button)
-			bit = replace_all(bit, '@@status', req.query.status)	
-		}
+			var row = replace_all_array(_ticket_tr, req.tickets[x])
+			row = replace_all_array(row, {status: req.query.status, prop: req.propid, bubble: bubble})
+			rows+=row;			
+		}		
+	}
+	
+	if(req.incoming_test_key != "" && req.incoming_test_cnt > 0) {
+		var bit = scriptlist.join(";")
 	} else {
-		bit = _oops
+		var bit = _tickets_table;
+		var bottombuttons = '';
+		if(req.query.status==STATUS_SUBMITTED){
+			bottombuttons = replace_all_array(_bottom_button, {status: req.query.status, prop: req.propid});
+		}
+		bottombuttons+=_bottom_search;
+		
+		var pages = ppages(req.tickets.length, _ticket_pages, '@@count')
+		bit = bit.replace('@@table_rows', rows);
+		bit = bit.replace('@@pages', pages);
+		bit = bit.replace('@@bottombuttons', bottombuttons);
+		var linksite_button = _linksite_button.replace('@@linksite', req.prop_linksite)
+		//todo before production
+		linksite_button = linksite_button.replace('http://guest.rbpsoftwaresolutions.com', env.server)
+		bit = bit.replace('@@linkpropbutton', linksite_button)
+		bit = replace_all(bit, '@@status', req.query.status)	
 	}
 	
 	res.write(bit)
@@ -9206,7 +9194,7 @@ restapi.get('/associate/create',
 	if(req.new_associate.length == 1 && req.new_assoc_prop > 0){
 		res.cookie("rbpx-g",'', { signed: false });
 		res.cookie("rbpx-u",req.new_associate[0]['email'], { signed: false });
-		res.cookie("rbpx-r",req.new_assoc_prop, { signed: false });	
+		//res.cookie("rbpx-r",req.new_assoc_prop, { signed: false });	
 		res.cookie("rbpx-x",req.query.id, { signed: false });	
 		res.redirect('/');
 	} else {
@@ -11381,21 +11369,16 @@ const _sql_single_ticket = (function () {/*
 	LEFT OUTER JOIN inquiries ON tickets.catID = inquiries.autoID	
 	LEFT OUTER JOIN ticket_locking ON tickets.autoID = ticket_locking.ticketID
 	LEFT OUTER JOIN users ON tickets.first_assignmentID = users.autoID
-	WHERE tickets.autoID = @@id
-	ORDER BY tickets.autoID desc 
+	ORDER BY tickets.autoID desc LIMIT 1
 	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
 
 //todo change this to not use limit 1	
 function middleHandler_db_get_last_ticket_inserted(req, res, next) {
-	if(true){
-		console.log("  middleHandler_db_get_last_ticket_inserted ");	
-		console.log(req.guest_ticket_last_row)
-		console.log(req.guest_ticket_inserted)
-	}
+	//console.log("  middleHandler_db_get_last_ticket_inserted "+req.errors.length);	
 	req.tickets = [];
 	//removed req.userid > 0 
-	if(req.errors.length == 0 && req.guest_ticket_inserted == 1 && req.guest_ticket_last_row > 0){		
-		var sql = _sql_single_ticket.replace('@@id', req.guest_ticket_last_row)
+	if(req.errors.length == 0){		
+		var sql = _sql_single_ticket		
 		//console.log(sql)
 		db.each(sql, function(err, row) {
 			var val = {id: row.autoID, 
@@ -12631,7 +12614,6 @@ const _sql_db_guest_insert_ticket = (function () {/*
 function middleHandler_guest_request_insert_ticket(req, res, next) {	
 	//console.log("  middleHandler_guest_request_insert_ticket " + req.errors.length);	
 	req.guest_ticket_inserted = 0
-	req.guest_ticket_last_row = 0
 	req.guest_ticket_gcode = ''
 	if(req.errors.length==0){
 		var d = new Date
@@ -12672,7 +12654,6 @@ function middleHandler_guest_request_insert_ticket(req, res, next) {
 		db.run(sql, function(err) {									
 		}, function (err) {		
 			req.guest_ticket_inserted = 1
-			req.guest_ticket_last_row = this['lastID']	
 			next()
 		});
 	}else{

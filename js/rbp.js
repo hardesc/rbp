@@ -521,7 +521,18 @@ function showblog(){
 	$("html, body").animate({ scrollTop: 0 }, 800);
 }			
 
-		
+function showjustdemo(){
+	$("#homecontainer").hide();
+	$(".guesttitle").hide();
+	$(".guestpage").hide();
+	$("#supportcontainer").hide();
+	$(".modulepage").hide();
+	$("#workcontainer").hide();
+	$("#usermewrap").hide();
+	$('#justdemo').fadeIn(1500);
+	$("html, body").animate({ scrollTop: 0 }, 800);
+}		
+	
 
 function page(r){
 if(close_ticket_edits()){return}
@@ -1060,6 +1071,45 @@ function senddemo() {
 			dspArray("demo-form","");
 			dspArray("demo-form-working","none");
 			alert(ra[1])
+		}
+	}};_h(a);
+		
+}
+
+function senddemo2() {
+	var er = false;
+	var spnm=gdv("demo2.sp.name");	if(spnm.length==0){er=true;aC("demo2.sp.name","flderror")}
+	var spem=gdv("demo2.sp.email");	if(spem.length==0 || validateEmail(spem)==false){er=true;aC("demo2.sp.email","flderror")}
+	var spre=gdv("demo2.sp.email2");	if(spre.length==0){er=true;aC("demo2.sp.email2","flderror")}
+	if(spem!=spre){er=true;
+		aC("demo2.sp.email1","flderror");
+		aC("demo2.sp.email2","flderror")
+	}
+	
+	if(er){
+		alert("Some required data is missing, or the data is not valid.");
+		//$("html, body").scrollTop(0)
+		return;
+	}
+	dspArray("demo2-form","none");
+	dspArray("demo2-form-working","");
+	
+	var r = "/demo_message?name="+encode(spnm)+"&email="+encode(spem);
+			
+	var a=_z(r);a.onreadystatechange=function(){if(a.readyState==4){		
+		var ra = a.responseText.split("::::");
+		console.log(ra)
+		if(ra[0]=="alert"){	
+			dspArray("demo2-form","");
+			dspArray("demo2-form-working","none");
+		} else {
+			sdv("demo2.sp.name","")
+			sdv("demo2.sp.email","")
+			sdv("demo2.sp.email2","")
+			dspArray("demo2-form","");
+			dspArray("demo2-form-working","none");
+			alert(ra[1])
+			home();
 		}
 	}};_h(a);
 		
