@@ -159,16 +159,20 @@ function replace_all_array(html, array) {
 //Simple obfuscation of clear text sent by forms
 function decode(txt) {
 	 var res = ""
-		for(var x=0;x<txt.length;x+=3){
-			var dat = txt.substr(x,3);
-			if(dat==="039") {
-				res+= "&#39;"  ;//ok to keep
-			} else if (dat === "010") {
-				res+= "<br><br>" ;//ok to convert/keep
-			} else {
-				res+= String.fromCharCode(parseInt(dat));
+	 if(txt){
+		if(txt.length>0){
+			for(var x=0;x<txt.length;x+=3){
+				var dat = txt.substr(x,3);
+				if(dat==="039") {
+					res+= "&#39;"  ;//ok to keep
+				} else if (dat === "010") {
+					res+= "<br><br>" ;//ok to convert/keep
+				} else {
+					res+= String.fromCharCode(parseInt(dat));
+				}
 			}
 		}
+	}
 	return res
 }
 	
@@ -268,7 +272,7 @@ function validateEmail(email) {
 function comment_bubble(a){
 	var bubble = ""
 	if(a){
-			var bs = a.split(',')
+			var bs = a.toString().split(',')
 			if(bs.length > 0){
 				var bsv = bs[bs.length-1]
 				if(bsv==8 || bsv==10){
@@ -5050,7 +5054,7 @@ const _guest_login_js = (function () {/*
 				
 				if(er==true){alert("Some of the form fields were not filled out completely.  The items outlined in red are required."+ex+" Please try again.");return;}
 				submit_req = '/guest-request?ty='+tkit+'&ps='+ps+'&it='+tkit+'&fn='+encode(tkfn)+'&mi='+encode(tkmi)+'&ln='+encode(tkln)+'&rn='+encode(tkrn)+'&ci='+tkci+'&co='+tkco+'&em='+tkem+'&rm='+tkrm+'&cr='+tkcr+'&ph='+tkph+'&ds='+tkds+'&ca='+encode(tkca)+'&sp='+encode(tksp)+'&am='+tkam+'&cc='+encode(tkcc);
-				
+				if(true){console.log(submit_req)}
 				document.getElementById("display.tk.itype."+ps).innerHTML = document.getElementById("ticket.tk.itype."+ps)[document.getElementById("ticket.tk.itype."+ps).value].text;
 				document.getElementById("display.tk.name."+ps).innerHTML = document.getElementById("ticket.tk.fname."+ps).value + " " + document.getElementById("ticket.tk.lname."+ps).value;
 				if(document.getElementById("ticket.tk.room."+ps).value==''){
@@ -5147,7 +5151,7 @@ const _guest_login_page = (function () {/*
 	@@csslink
 	</head><body>
 	<div id="guest-instructions" class="instructions">
-						<p>If you have an issue with your hotel stay, please submit a guest inquiry ticket by completing the form below.</p>						
+						<p>If you have an issue with your hotel stay, please complete what information you have available and submit a guest inquiry ticket by completing the form below.</p>						
 					</div>
 					
 	<form id='guest-ticket' action='javascript:void(0);'>
@@ -6041,7 +6045,7 @@ restapi.get('/home',
 	middleHandler_db_get_user_login_cookie_factory, 
 	
 	function(req,res){	
-	if(true){console.log('/home e='+req.query.e+' p='+req.query.p);}
+	if(true){console.log('/home e='+req.query.e);}
 	var r = req.query.r; if(r == ''){r=0}
 	var propid = r;
 		
@@ -6266,7 +6270,7 @@ function middleHandler_send_message(req, res, next) {
 			to = env.dev_redirect_outgoing_emails_to;
 		}
 		var debug = true
-		if(_debug){
+		if(true){
 			console.log(to)
 			console.log(req.sendmail_from)
 			console.log(subject)
@@ -7049,7 +7053,7 @@ function middleHandler_db_get_tickets(req, res, next) {
 		req.tickets = [];
 		var sql = _sql_tickets.replace('@@pid', req.propid);
 		sql = sql.replace('@@statsql', statsql);		
-		if(_debug){console.log(sql)}
+		if(true){console.log(sql)}
 		db.each(sql, function(err, row) {
 			var val = {id: row.autoID, 
 			ticketno: row.ticketno, 
@@ -11348,6 +11352,7 @@ function middleHandler_associate_insert_ticket(req, res, next) {
 		met: req.query.met
 		})
 		var found = false;
+		if(true){console.log(sql)}
 		db.run(sql, function(err) {						
 			//console.log("ierr"+err)
 		}, function (err) {		
@@ -12629,7 +12634,10 @@ const _sql_db_guest_insert_ticket = (function () {/*
 	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
 
 function middleHandler_guest_request_insert_ticket(req, res, next) {	
-	//console.log("  middleHandler_guest_request_insert_ticket " + req.errors.length);	
+	if(true){
+		console.log("  middleHandler_guest_request_insert_ticket " + req.errors.length);	
+		console.log(req.query)
+	}
 	req.guest_ticket_inserted = 0
 	req.guest_ticket_last_row = 0
 	req.guest_ticket_gcode = ''
@@ -12638,10 +12646,11 @@ function middleHandler_guest_request_insert_ticket(req, res, next) {
 		var cdt = clk(d);
 		var guid = require('guid');
 		req.guest_ticket_gcode = guid.create();
-		
-		if(req.query.am.toString().length==0){req.query.am = "0"}
-		var amt = req.query.am.replace(/[^0-9.]+/g, '')
-		if(amt>0){amt = amt * 100}
+		if(true){console.log(req.query.am)}
+		if (!req.query.am){req.query.am = "0";amt = 0}else{
+			var amt = req.query.am.replace(/[^0-9.]+/g, '')
+			if(amt>0){amt = amt * 100}
+		}
 		
 		var sql = replace_all_array(_sql_db_guest_insert_ticket, {
 		status: STATUS_SUBMITTED,
@@ -12654,7 +12663,7 @@ function middleHandler_guest_request_insert_ticket(req, res, next) {
 		em: req.query.em.toLowerCase(),
 		ph: req.query.ph,
 		am: amt,
-		ds: credit_card_mask(req.query.ds),
+		ds: clean_for_db_write(credit_card_mask(req.query.ds)),
 		rn: req.query.rn,
 		ci: req.query.ci,
 		co: req.query.co,
@@ -12669,6 +12678,7 @@ function middleHandler_guest_request_insert_ticket(req, res, next) {
 		cc: decode(req.query.cc)
 		})
 		var found = false;		
+		if(true){console.log(sql)}
 		db.run(sql, function(err) {									
 		}, function (err) {		
 			req.guest_ticket_inserted = 1
@@ -12745,9 +12755,12 @@ To reply to this message, please use the following link:<br><br>
 	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];	
 	
 function middleHandler_guest_request_message(req, res, next) {
-	//console.log("  middleHandler_guest_request_message");	
+	if(true){
+		console.log("  middleHandler_guest_request_message");	
+		console.log(req.tickets[0])
+	}
 	req.sendmail_send = false;
-	if(req.errors.length == 0){
+	if(req.errors.length == 0 && req.guest_ticket_last_row > 0){
 		req.sendmail_send = true;
 		req.sendmail_from = env.sendmail_from_noreply
 		req.sendmail_to = req.query.em.toLowerCase();
@@ -12757,6 +12770,8 @@ function middleHandler_guest_request_message(req, res, next) {
 		req.sendmail_text = body + replace_all_array(_em_link_text, params)
 		req.sendmail_html = body + replace_all_array(_em_link_html, params)
 		req.sendmail_okresponse = 'Message sent.'
+	} else {
+		console.log("ERROR making guest ticket "+req.guest_ticket_last_row)
 	}
 	next();
 }	
