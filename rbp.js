@@ -110,7 +110,7 @@ if (env.env == 'development') {
 var upload = multer({ storage: storage })	
 */
 
-var storage = multer.diskStorage({
+var storage = multer.diskStorage({ //processes non-text input from forms.
   destination: function (req, file, cb) {
     cb(null, __dirname + '/rbp-uploads/')
   },
@@ -378,6 +378,7 @@ function guest_display(pid, did, label){
 	return replace_all_array(_guest_display_row, {pid: pid, did: did, label: label})
 }
 
+//Date of ticket edit
 function rbp_dte() {
 	var d = new Date,
 	hours = d.getHours(),
@@ -2583,7 +2584,7 @@ const _support = (function () {/*
 	<div style='margin-left: 40px;'>
 		<h4>How do I use the keyboard when entering data?</h4>
 		<p>Tab and spacebar are the primary keys to use on forms.  The tab key will move the focus to the next field and make it active.  Active fields are outlined in blue.</p>
-		<p>If the active field is a text input box, you will see the curson blinking and you can just stop typing.</p>
+		<p>If the active field is a text input box, you will see the cursor blinking and you can just start typing.</p>
 	</div>
 	<H3 style='cursor:pointer;' onclick='flip_fa("support-form","sup","sdn");'>Contact Support 
 		<span id="sup" class='fa fa-arrow-circle-up' style='display:none;'></span>
@@ -3820,7 +3821,8 @@ const _common_property_more_form = (function () { /*
 		@@users_section
 	</div>
 	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
-		
+
+//Property List -> Choose Property -> List Associates; see property_edit_users_section
 const _property_edit_users_section = (function () {/*
 <label class='desc' style='padding-left:10px;'>Property Associates</label><div id='propuserswrap'>
 	<table id='prop-assoc-list' class='footable' data-page-navigation='.pagination' data-page-size='10'><thead><tr><th>Name</th><th>Email</th></tr></thead>
@@ -5644,8 +5646,9 @@ function middleHandler_db_get_user_login_with_properties(req, res, next) {
 		sql = _sql_regular_login_with_properties.replace('@@email', req.query.e);
 		sql = sql.replace('@@password', bplBase64Sha512(req.query.p+req.query.e));
 	}
-	//console.log('    req.userid = ' + req.userid);
+	console.log('    req.userid = ' + req.userid);
 	if(sql.length > 0) {
+		//populate the SQL query
 		req.user_properties = [];	
 		db.each(sql, function(err, row) {			
 			req.userid = row.userid;
@@ -5657,7 +5660,7 @@ function middleHandler_db_get_user_login_with_properties(req, res, next) {
 			req.user_superadmin = row.superadmin;
 
 			var val = {id: row.propid, name: row.pname}
-			//console.log('    setting properties ' + row.propid)
+			console.log('    setting properties ' + row.propid)
 			req.user_properties.push(val)		
 		}, function () {	
 			if(req.user_properties.length>0){
@@ -7372,6 +7375,8 @@ restapi.get('/reports',
 	res.end();
 })
 
+
+//Structure basic query for users (esp. Associates)
 const _sql_shared_get_users = (function () {/*  	
 SELECT users.autoID AS id,
        ( 
@@ -7382,9 +7387,9 @@ SELECT users.autoID AS id,
        AS property_ids,
        ( 
            SELECT group_concat( properties.pname, ',' )
-             FROM user_properties
-             INNER JOIN properties ON user_properties.propertyid = properties.autoID 
-             WHERE user_properties.userid = users.autoID
+           FROM user_properties
+           INNER JOIN properties ON user_properties.propertyid = properties.autoID 
+           WHERE user_properties.userid = users.autoID
        ) 
        AS property_names,
        (
@@ -7417,7 +7422,7 @@ SELECT users.autoID AS id,
        groupcount,
        excludeassign,
        superadmin
-  FROM users
+  FROM users INNER JOIN user_properties ON user_properties.userID = users.autoID
 	
 	*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
 	
@@ -7462,27 +7467,30 @@ function shared_userrow(row){
 		}	
 	return val
 }
-function middleHandler_db_admin_users(req, res, next) {
+function middleHandler_db_admin_users(req, res, next) {//create list of Associates
 	//console.log("  middleHandler_db_admin_users ");	
 	req.admin_users = [];
 	if(req.userid > 0 && (req.user_admin == 1 || req.user_superadmin == 1)){
 		var sql = '';
 		if(req.query.a == 0 || req.query.a == 1){
+			//Collect all users that haven't been deleted and are on the list 
 			var sql_shared_get_users = _sql_shared_get_users+" WHERE users.deleted = 0 AND @@groups AND (@@sqlor) GROUP BY users.autoID"
 			if(req.user_superadmin==1){
-				sql = sql_shared_get_users.replace('@@sqlor','users.autoID > 0')
+				sql = sql_shared_get_users.replace('@@sqlor','users.autoID > 0')//Get all users
 			}else if(req.user_admin==1){
-				if(req.user_properties.length>0){
+				if(req.user_properties.length>0){//If the administrator has one or more properties in the database
 					var sqlorlist = []
-					for(var x=0;x<req.user_properties.length;x++){
-						sqlorlist.push('propertyID = '+req.user_properties[x]['id'])
+					for(var x=0;x<req.user_properties.length;x++){//for every one of those properties
+						sqlorlist.push('propertyID = '+req.user_properties[x]['id']);//push the property to the sqlorlist array -- MAYBE SHOULD BE [x]['propertyID']?
+						console.log(sqlorlist[x]);//TESTING -- Make sure the string is built properly
 					}
-					sql = sql_shared_get_users.replace('@@sqlor',sqlorlist.join(' OR '))
+					sql = sql_shared_get_users.replace('@@sqlor',sqlorlist.join(' OR '))//insert the list of properties as a group of ORs into the sql_shared_get_users query
+					console.log(sql);//TESTING -- Make sure the string is built properly
 				}
 			}
-			if(req.query.a == 0){sql = sql.replace('@@groups', 'groupcount = 0')}
+			if(req.query.a == 0){sql = sql.replace('@@groups', 'groupcount = 0')} //Find out what the groupcounts are for. Not all are 0.
 			if(req.query.a == 1){sql = sql.replace('@@groups', 'groupcount > 0')}			
-			if(_debug){console.log(sql)}
+			//if(_debug){console.log(sql)}
 			db.each(sql, function(err, row) {								
 					req.admin_users.push(shared_userrow(row));
 			}, function () {
@@ -7954,7 +7962,7 @@ restapi.get('/admin',
 	mh_admin_blogs,
 	
 	function(req,res){		
-	//console.log("/admin "+req.query.a);
+	console.log("/admin "+req.query.a);
 	var rows = '';
 
 	if(req.user_superadmin==1){
@@ -7969,9 +7977,13 @@ restapi.get('/admin',
 	
 	if(req.query.a==0 || req.query.a == 1) {
 		var row_tr = _users_tr
+		
+		//begin tables in Administrator/SuperAdmin menu
 		if(req.query.a==0){rows = _associates_table_start}
 		if(req.query.a==1){rows = _groups_table_start; row_tr = _groups_tr}
-		for(var x=0;x<req.admin_users.length;x++){
+		
+		//populate whichever table
+		for(var x=0;x<req.admin_users.length;x++){ //for as many administrator users as there are in the database
 			var row = replace_all_array(row_tr, req.admin_users[x])
 			if(req.query.a==0){
 				row = row.replace('@@js','sdtn("associates-table");divup("/edit-associate?id='+req.admin_users[x]['id']+'","associate-edit");')
@@ -7981,6 +7993,9 @@ restapi.get('/admin',
 			}
 			rows+=row;
 		};
+		
+		
+		//end tables in Administrator/SuperAdmin menu
 		if(req.query.a==0){rows += _associates_table_end}		
 		if(req.query.a==1){rows += _groups_table_end}		
 	}	
